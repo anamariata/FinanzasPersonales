@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finanzas Personales</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tab-button.active {
+            background: linear-gradient(135deg, #ec4899, #f472b6);
+            color: white;
+        }
+        .tab-button {
+            background: #fdf2f8;
+            color: #be185d;
+        }
+        .tab-button:hover {
+            background: #fce7f3;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-pink-50 to-rose-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">💰 Finanzas Personales</h1>
+            <p class="text-gray-600">Control completo de tus ingresos, gastos y metas financieras en soles</p>
+        </header>
+
+        <!-- Navegación por pestañas -->
+        <nav class="bg-white rounded-xl shadow-lg p-2 mb-8">
+            <div class="flex flex-wrap gap-2">
+                <button class="tab-button active px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="ingresos">💰 Ingresos</button>
+                <button class="tab-button px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="gastos">💸 Gastos</button>
+                <button class="tab-button px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="resumen">📊 Resumen</button>
+                <button class="tab-button px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="metas">🎯 Metas</button>
+                <button class="tab-button px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="presupuesto">📅 Presupuesto</button>
+                <button class="tab-button px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="anual">📆 Resumen Anual</button>
+            </div>
+        </nav>
+
+        <main>
+            <!-- SECCIÓN INGRESOS -->
+            <div id="ingresos" class="tab-content active">
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-green-400">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">💰 Registrar Ingreso</h2>
+                    <form id="ingresoForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="fechaIngreso" class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+                                <input type="date" id="fechaIngreso" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label for="fuenteIngreso" class="block text-sm font-medium text-gray-700 mb-2">Fuente</label>
+                                <select id="fuenteIngreso" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                    <option value="">Selecciona fuente</option>
+                                    <option value="Sueldo">💼 Sueldo</option>
+                                    <option value="Freelance">💻 Freelance</option>
+                                    <option value="Venta">🛍️ Venta</option>
+                                    <option value="Inversión">📈 Inversión</option>
+                                    <option value="Bono">🎁 Bono</option>
+                                    <option value="Otros">📦 Otros</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="montoIngreso" class="block text-sm font-medium text-gray-700 mb-2">Monto (S/)</label>
+                                <input type="number" id="montoIngreso" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="tipoIngreso" class="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
+                                <select id="tipoIngreso" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                    <option value="">Selecciona tipo</option>
+                                    <option value="Fijo">🔒 Fijo</option>
+                                    <option value="Variable">🔄 Variable</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="metodoPagoIngreso" class="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
+                                <select id="metodoPagoIngreso" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                    <option value="">Selecciona método</option>
+                                    <option value="Efectivo">💵 Efectivo</option>
+                                    <option value="Tarjeta">💳 Tarjeta</option>
+                                    <option value="Transferencia">🏦 Transferencia</option>
+                                    <option value="Yape/Plin">📱 Yape/Plin</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="comentariosIngreso" class="block text-sm font-medium text-gray-700 mb-2">Comentarios</label>
+                                <input type="text" id="comentariosIngreso" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Comentarios adicionales...">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                            ➕ Agregar Ingreso
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Resumen y gráfico de ingresos -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">📊 Total Mensual</h3>
+                        <div class="text-3xl font-bold text-green-600 mb-2">S/ <span id="totalIngresosMes">0.00</span></div>
+                        <p class="text-gray-600">Ingresos del mes actual</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">📈 Evolución de Ingresos</h3>
+                        <canvas id="ingresosChart" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Lista de ingresos -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold text-gray-800">Historial de Ingresos</h3>
+                        <div class="text-lg font-bold text-green-600">Total: S/ <span id="totalIngresos">0.00</span></div>
+                    </div>
+                    <div id="listaIngresos" class="space-y-3">
+                        <p class="text-gray-500 text-center py-8">No hay ingresos registrados</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN GASTOS -->
+            <div id="gastos" class="tab-content">
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-pink-400">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">💸 Registrar Gasto</h2>
+                    <form id="gastoForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="fechaGasto" class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+                                <input type="date" id="fechaGasto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label for="categoriaGasto" class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+                                <select id="categoriaGasto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                    <option value="">Selecciona categoría</option>
+                                    <option value="Alimentación">🍽️ Alimentación</option>
+                                    <option value="Transporte">🚗 Transporte</option>
+                                    <option value="Ocio">🎬 Ocio</option>
+                                    <option value="Salud">🏥 Salud</option>
+                                    <option value="Servicios">💡 Servicios</option>
+                                    <option value="Compras">🛍️ Compras</option>
+                                    <option value="Educación">📚 Educación</option>
+                                    <option value="Otros">📦 Otros</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="montoGasto" class="block text-sm font-medium text-gray-700 mb-2">Monto (S/)</label>
+                                <input type="number" id="montoGasto" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="descripcionGasto" class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+                                <input type="text" id="descripcionGasto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Descripción del gasto">
+                            </div>
+                            <div>
+                                <label for="metodoPagoGasto" class="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
+                                <select id="metodoPagoGasto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                    <option value="">Selecciona método</option>
+                                    <option value="Efectivo">💵 Efectivo</option>
+                                    <option value="Tarjeta">💳 Tarjeta</option>
+                                    <option value="Transferencia">🏦 Transferencia</option>
+                                    <option value="Yape/Plin">📱 Yape/Plin</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="tipoGasto" class="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
+                                <select id="tipoGasto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                    <option value="">Selecciona tipo</option>
+                                    <option value="Fijo">🔒 Fijo</option>
+                                    <option value="Variable">🔄 Variable</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                            ➕ Agregar Gasto
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Resumen y gráfico de gastos -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">📊 Gastos por Categoría</h3>
+                        <div id="gastosPorCategoria" class="space-y-2">
+                            <p class="text-gray-500">No hay gastos registrados</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">🌸 Distribución de Gastos</h3>
+                        <canvas id="gastosChart" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Lista de gastos -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold text-gray-800">Historial de Gastos</h3>
+                        <div class="text-lg font-bold text-pink-600">Total: S/ <span id="totalGastos">0.00</span></div>
+                    </div>
+                    <div id="listaGastos" class="space-y-3">
+                        <p class="text-gray-500 text-center py-8">No hay gastos registrados</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN RESUMEN FINANCIERO -->
+            <div id="resumen" class="tab-content">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-400">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">💰 Ingresos del Mes</h3>
+                        <p class="text-3xl font-bold text-green-600">S/ <span id="resumenIngresosMes">0.00</span></p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-pink-400">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">💸 Gastos del Mes</h3>
+                        <p class="text-3xl font-bold text-pink-600">S/ <span id="resumenGastosMes">0.00</span></p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-400">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">📊 Balance Mensual</h3>
+                        <p class="text-3xl font-bold" id="balanceTexto">S/ <span id="resumenBalance">0.00</span></p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-400">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">💎 % de Ahorro</h3>
+                        <p class="text-3xl font-bold text-purple-600"><span id="porcentajeAhorro">0</span>%</p>
+                    </div>
+                </div>
+
+                <!-- Indicador visual -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">🎯 Estado Financiero</h3>
+                    <div id="indicadorFinanciero" class="p-6 rounded-lg text-center">
+                        <div class="text-4xl mb-2" id="iconoEstado">💰</div>
+                        <div class="text-xl font-semibold" id="textoEstado">Registra tus primeros movimientos</div>
+                        <div class="text-gray-600 mt-2" id="descripcionEstado">Agrega ingresos y gastos para ver tu estado financiero</div>
+                    </div>
+                </div>
+
+                <!-- Gráficos comparativos -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">📈 Comparación Mensual</h3>
+                        <canvas id="comparativoChart" height="300"></canvas>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">📊 Evolución del Balance</h3>
+                        <canvas id="balanceChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN METAS -->
+            <div id="metas" class="tab-content">
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-purple-400">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">🎯 Nueva Meta de Ahorro</h2>
+                    <form id="metaForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="nombreMeta" class="block text-sm font-medium text-gray-700 mb-2">Meta</label>
+                                <input type="text" id="nombreMeta" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Ej: Viaje, Fondo de emergencia, Nuevo celular">
+                            </div>
+                            <div>
+                                <label for="montoObjetivo" class="block text-sm font-medium text-gray-700 mb-2">Monto Objetivo (S/)</label>
+                                <input type="number" id="montoObjetivo" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="ahorroActual" class="block text-sm font-medium text-gray-700 mb-2">Ahorro Actual (S/)</label>
+                                <input type="number" id="ahorroActual" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label for="fechaLimite" class="block text-sm font-medium text-gray-700 mb-2">Fecha Límite</label>
+                                <input type="date" id="fechaLimite" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                            🎯 Crear Meta
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Lista de metas -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Mis Metas de Ahorro</h3>
+                    <div id="listaMetas" class="space-y-4">
+                        <p class="text-gray-500 text-center py-8">No hay metas registradas</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN PRESUPUESTO MENSUAL -->
+            <div id="presupuesto" class="tab-content">
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-blue-400">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">📅 Configurar Presupuesto Mensual</h2>
+                    <form id="presupuestoForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="categoriaPresupuesto" class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+                                <select id="categoriaPresupuesto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Selecciona categoría</option>
+                                    <option value="Alimentación">🍽️ Alimentación</option>
+                                    <option value="Transporte">🚗 Transporte</option>
+                                    <option value="Ocio">🎬 Ocio</option>
+                                    <option value="Salud">🏥 Salud</option>
+                                    <option value="Servicios">💡 Servicios</option>
+                                    <option value="Compras">🛍️ Compras</option>
+                                    <option value="Educación">📚 Educación</option>
+                                    <option value="Otros">📦 Otros</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="montoPresupuesto" class="block text-sm font-medium text-gray-700 mb-2">Presupuesto Planeado (S/)</label>
+                                <input type="number" id="montoPresupuesto" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0.00">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                            📅 Establecer Presupuesto
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Gráfico comparativo -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">🌸 Gráfico Comparativo</h3>
+                    <canvas id="presupuestoChart" height="300"></canvas>
+                </div>
+
+                <!-- Tabla comparativa -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Presupuesto vs Gasto Real</h3>
+                    <div id="tablaPresupuesto" class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3">Categoría</th>
+                                    <th class="px-6 py-3">Presupuesto Planeado</th>
+                                    <th class="px-6 py-3">Gasto Real</th>
+                                    <th class="px-6 py-3">Diferencia</th>
+                                    <th class="px-6 py-3">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cuerpoTablaPresupuesto">
+                                <tr>
+                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">No hay presupuestos configurados</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN RESUMEN ANUAL -->
+            <div id="anual" class="tab-content">
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">📆 Resumen Anual <span id="anioActual">2024</span></h2>
+                    
+                    <!-- Selector de año -->
+                    <div class="mb-6">
+                        <label for="selectorAnio" class="block text-sm font-medium text-gray-700 mb-2">Seleccionar Año</label>
+                        <select id="selectorAnio" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                        </select>
+                    </div>
+
+                    <!-- Tabla resumen anual -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-gray-700 uppercase bg-gradient-to-r from-pink-50 to-rose-50">
+                                <tr>
+                                    <th class="px-6 py-3">Mes</th>
+                                    <th class="px-6 py-3">Ingresos (S/)</th>
+                                    <th class="px-6 py-3">Gastos (S/)</th>
+                                    <th class="px-6 py-3">Ahorro (S/)</th>
+                                    <th class="px-6 py-3">Balance (S/)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaResumenAnual">
+                                <!-- Se llena dinámicamente -->
+                            </tbody>
+                            <tfoot class="bg-gray-50 font-semibold">
+                                <tr>
+                                    <td class="px-6 py-3">TOTAL ANUAL</td>
+                                    <td class="px-6 py-3 text-green-600" id="totalIngresosAnual">S/ 0.00</td>
+                                    <td class="px-6 py-3 text-pink-600" id="totalGastosAnual">S/ 0.00</td>
+                                    <td class="px-6 py-3 text-purple-600" id="totalAhorroAnual">S/ 0.00</td>
+                                    <td class="px-6 py-3" id="totalBalanceAnual">S/ 0.00</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Gráfico de tendencia anual -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">📈 Tendencia Anual</h3>
+                    <canvas id="tendenciaAnualChart" height="400"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Variables globales
+        let ingresos = JSON.parse(localStorage.getItem('ingresos')) || [];
+        let gastos = JSON.parse(localStorage.getItem('gastos')) || [];
+        let metas = JSON.parse(localStorage.getItem('metas')) || [];
+        let presupuestos = JSON.parse(localStorage.getItem('presupuestos')) || [];
+
+        // Charts globales
+        let ingresosChart, gastosChart, comparativoChart, balanceChart, presupuestoChart, tendenciaAnualChart;
+
+        // Establecer fechas actuales
+        document.getElementById('fechaIngreso').valueAsDate = new Date();
+        document.getElementById('fechaGasto').valueAsDate = new Date();
+        document.getElementById('anioActual').textContent = new Date().getFullYear();
+
+        // Funciones de almacenamiento
+        function guardarDatos() {
+            localStorage.setItem('ingresos', JSON.stringify(ingresos));
+            localStorage.setItem('gastos', JSON.stringify(gastos));
+            localStorage.setItem('metas', JSON.stringify(metas));
+            localStorage.setItem('presupuestos', JSON.stringify(presupuestos));
+        }
+
+        // Navegación por pestañas
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.dataset.tab;
+                
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                document.getElementById(tabId).classList.add('active');
+                button.classList.add('active');
+                
+                // Actualizar gráficos según la pestaña
+                setTimeout(() => {
+                    if (tabId === 'ingresos') actualizarGraficoIngresos();
+                    if (tabId === 'gastos') actualizarGraficoGastos();
+                    if (tabId === 'resumen') actualizarGraficosResumen();
+                    if (tabId === 'presupuesto') actualizarGraficoPresupuesto();
+                    if (tabId === 'anual') actualizarResumenAnual();
+                }, 100);
+            });
+        });
+
+        // Formularios
+        document.getElementById('ingresoForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const nuevoIngreso = {
+                id: Date.now(),
+                fecha: document.getElementById('fechaIngreso').value,
+                fuente: document.getElementById('fuenteIngreso').value,
+                monto: parseFloat(document.getElementById('montoIngreso').value),
+                tipo: document.getElementById('tipoIngreso').value,
+                metodoPago: document.getElementById('metodoPagoIngreso').value,
+                comentarios: document.getElementById('comentariosIngreso').value
+            };
+            
+            ingresos.push(nuevoIngreso);
+            guardarDatos();
+            actualizarTodo();
+            document.getElementById('ingresoForm').reset();
+            document.getElementById('fechaIngreso').valueAsDate = new Date();
+        });
+
+        document.getElementById('gastoForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const nuevoGasto = {
+                id: Date.now(),
+                fecha: document.getElementById('fechaGasto').value,
+                categoria: document.getElementById('categoriaGasto').value,
+                descripcion: document.getElementById('descripcionGasto').value,
+                monto: parseFloat(document.getElementById('montoGasto').value),
+                metodoPago: document.getElementById('metodoPagoGasto').value,
+                tipo: document.getElementById('tipoGasto').value
+            };
+            
+            gastos.push(nuevoGasto);
+            guardarDatos();
+            actualizarTodo();
+            document.getElementById('gastoForm').reset();
+            document.getElementById('fechaGasto').valueAsDate = new Date();
+        });
+
+        document.getElementById('metaForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const nuevaMeta = {
+                id: Date.now(),
+                nombre: document.getElementById('nombreMeta').value,
+                montoObjetivo: parseFloat(document.getElementById('montoObjetivo').value),
+                ahorroActual: parseFloat(document.getElementById('ahorroActual').value) || 0,
+                fechaLimite: document.getElementById('fechaLimite').value
+            };
+            
+            metas.push(nuevaMeta);
+            guardarDatos();
+            actualizarMetas();
+            document.getElementById('metaForm').reset();
+        });
+
+        document.getElementById('presupuestoForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const categoria = document.getElementById('categoriaPresupuesto').value;
+            const monto = parseFloat(document.getElementById('montoPresupuesto').value);
+            
+            const existente = presupuestos.findIndex(p => p.categoria === categoria);
+            
+            if (existente !== -1) {
+                presupuestos[existente].monto = monto;
+            } else {
+                presupuestos.push({
+                    id: Date.now(),
+                    categoria,
+                    monto
+                });
+            }
+            
+            guardarDatos();
+            actualizarPresupuesto();
+            document.getElementById('presupuestoForm').reset();
+        });
+
+        // Selector de año
+        document.getElementById('selectorAnio').addEventListener('change', actualizarResumenAnual);
+
+        // Funciones de actualización
+        function actualizarTodo() {
+            actualizarIngresos();
+            actualizarGastos();
+            actualizarResumen();
+            actualizarMetas();
+            actualizarPresupuesto();
+        }
+
+        function obtenerMesActual() {
+            const ahora = new Date();
+            return `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        function filtrarPorMes(datos, mes) {
+            return datos.filter(item => item.fecha.startsWith(mes));
+        }
+
+        function actualizarIngresos() {
+            const mesActual = obtenerMesActual();
+            const ingresosMes = filtrarPorMes(ingresos, mesActual);
+            const totalMes = ingresosMes.reduce((sum, ingreso) => sum + ingreso.monto, 0);
+            const totalGeneral = ingresos.reduce((sum, ingreso) => sum + ingreso.monto, 0);
+            
+            document.getElementById('totalIngresosMes').textContent = totalMes.toFixed(2);
+            document.getElementById('totalIngresos').textContent = totalGeneral.toFixed(2);
+            
+            const lista = document.getElementById('listaIngresos');
+            
+            if (ingresos.length === 0) {
+                lista.innerHTML = '<p class="text-gray-500 text-center py-8">No hay ingresos registrados</p>';
+                return;
+            }
+            
+            const ingresosOrdenados = [...ingresos].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            lista.innerHTML = ingresosOrdenados.map(ingreso => `
+                <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-1">
+                            <span class="text-lg">${getFuenteIcon(ingreso.fuente)}</span>
+                            <h4 class="font-semibold text-gray-800">${ingreso.fuente}</h4>
+                            <span class="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">${ingreso.tipo}</span>
+                        </div>
+                        <p class="text-sm text-gray-600">${formatearFecha(ingreso.fecha)} • ${ingreso.metodoPago}</p>
+                        ${ingreso.comentarios ? `<p class="text-sm text-gray-500 mt-1">${ingreso.comentarios}</p>` : ''}
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xl font-bold text-green-600">S/ ${ingreso.monto.toFixed(2)}</span>
+                        <button onclick="eliminarIngreso(${ingreso.id})" class="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition duration-200">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function actualizarGastos() {
+            const totalGeneral = gastos.reduce((sum, gasto) => sum + gasto.monto, 0);
+            document.getElementById('totalGastos').textContent = totalGeneral.toFixed(2);
+            
+            // Actualizar gastos por categoría
+            const gastosPorCategoria = {};
+            gastos.forEach(gasto => {
+                gastosPorCategoria[gasto.categoria] = (gastosPorCategoria[gasto.categoria] || 0) + gasto.monto;
+            });
+            
+            const contenedorCategorias = document.getElementById('gastosPorCategoria');
+            if (Object.keys(gastosPorCategoria).length === 0) {
+                contenedorCategorias.innerHTML = '<p class="text-gray-500">No hay gastos registrados</p>';
+            } else {
+                contenedorCategorias.innerHTML = Object.entries(gastosPorCategoria)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([categoria, monto]) => `
+                        <div class="flex justify-between items-center p-2 bg-pink-50 rounded">
+                            <span class="text-sm font-medium">${getCategoriaIcon(categoria)} ${categoria}</span>
+                            <span class="text-sm font-bold text-pink-600">S/ ${monto.toFixed(2)}</span>
+                        </div>
+                    `).join('');
+            }
+            
+            const lista = document.getElementById('listaGastos');
+            
+            if (gastos.length === 0) {
+                lista.innerHTML = '<p class="text-gray-500 text-center py-8">No hay gastos registrados</p>';
+                return;
+            }
+            
+            const gastosOrdenados = [...gastos].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            lista.innerHTML = gastosOrdenados.map(gasto => `
+                <div class="flex items-center justify-between p-4 bg-pink-50 rounded-lg border border-pink-200">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-3 mb-1">
+                            <span class="text-lg">${getCategoriaIcon(gasto.categoria)}</span>
+                            <h4 class="font-semibold text-gray-800">${gasto.descripcion}</h4>
+                            <span class="text-sm bg-pink-100 text-pink-800 px-2 py-1 rounded-full">${gasto.categoria}</span>
+                        </div>
+                        <p class="text-sm text-gray-600">${formatearFecha(gasto.fecha)} • ${gasto.metodoPago} • ${gasto.tipo}</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xl font-bold text-pink-600">S/ ${gasto.monto.toFixed(2)}</span>
+                        <button onclick="eliminarGasto(${gasto.id})" class="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition duration-200">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function actualizarResumen() {
+            const mesActual = obtenerMesActual();
+            const ingresosMes = filtrarPorMes(ingresos, mesActual);
+            const gastosMes = filtrarPorMes(gastos, mesActual);
+            
+            const totalIngresosMes = ingresosMes.reduce((sum, ingreso) => sum + ingreso.monto, 0);
+            const totalGastosMes = gastosMes.reduce((sum, gasto) => sum + gasto.monto, 0);
+            const balance = totalIngresosMes - totalGastosMes;
+            const porcentajeAhorro = totalIngresosMes > 0 ? ((balance / totalIngresosMes) * 100) : 0;
+            
+            document.getElementById('resumenIngresosMes').textContent = totalIngresosMes.toFixed(2);
+            document.getElementById('resumenGastosMes').textContent = totalGastosMes.toFixed(2);
+            document.getElementById('resumenBalance').textContent = balance.toFixed(2);
+            document.getElementById('porcentajeAhorro').textContent = porcentajeAhorro.toFixed(1);
+            
+            // Actualizar indicador visual
+            const indicador = document.getElementById('indicadorFinanciero');
+            const icono = document.getElementById('iconoEstado');
+            const texto = document.getElementById('textoEstado');
+            const descripcion = document.getElementById('descripcionEstado');
+            const balanceTexto = document.getElementById('balanceTexto');
+            
+            if (totalIngresosMes === 0 && totalGastosMes === 0) {
+                indicador.className = 'p-6 rounded-lg text-center bg-gray-100';
+                icono.textContent = '💰';
+                texto.textContent = 'Registra tus primeros movimientos';
+                descripcion.textContent = 'Agrega ingresos y gastos para ver tu estado financiero';
+                balanceTexto.className = 'text-3xl font-bold text-gray-600';
+            } else if (porcentajeAhorro >= 20) {
+                indicador.className = 'p-6 rounded-lg text-center bg-green-100 border-2 border-green-300';
+                icono.textContent = '🌟';
+                texto.textContent = '¡Excelente ahorro!';
+                descripcion.textContent = `Estás ahorrando ${porcentajeAhorro.toFixed(1)}% de tus ingresos`;
+                balanceTexto.className = 'text-3xl font-bold text-green-600';
+            } else if (porcentajeAhorro >= 0) {
+                indicador.className = 'p-6 rounded-lg text-center bg-yellow-100 border-2 border-yellow-300';
+                icono.textContent = '⚖️';
+                texto.textContent = 'Balance equilibrado';
+                descripcion.textContent = 'Puedes mejorar tu ahorro reduciendo algunos gastos';
+                balanceTexto.className = 'text-3xl font-bold text-yellow-600';
+            } else {
+                indicador.className = 'p-6 rounded-lg text-center bg-pink-100 border-2 border-pink-300';
+                icono.textContent = '⚠️';
+                texto.textContent = 'Gasto alto';
+                descripcion.textContent = 'Tus gastos superan tus ingresos este mes';
+                balanceTexto.className = 'text-3xl font-bold text-pink-600';
+            }
+        }
+
+        function actualizarMetas() {
+            const lista = document.getElementById('listaMetas');
+            
+            if (metas.length === 0) {
+                lista.innerHTML = '<p class="text-gray-500 text-center py-8">No hay metas registradas</p>';
+                return;
+            }
+            
+            lista.innerHTML = metas.map(meta => {
+                const progreso = (meta.ahorroActual / meta.montoObjetivo) * 100;
+                const diasRestantes = meta.fechaLimite ? Math.ceil((new Date(meta.fechaLimite) - new Date()) / (1000 * 60 * 60 * 24)) : null;
+                const alerta80 = progreso >= 80;
+                
+                return `
+                    <div class="p-4 ${alerta80 ? 'bg-yellow-50 border-2 border-yellow-300' : 'bg-purple-50'} rounded-lg border">
+                        ${alerta80 ? '<div class="text-yellow-600 text-sm font-medium mb-2">🎉 ¡Casi alcanzas tu meta!</div>' : ''}
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <h4 class="font-semibold text-gray-800 text-lg">🎯 ${meta.nombre}</h4>
+                                <p class="text-sm text-gray-600">S/ ${meta.ahorroActual.toFixed(2)} de S/ ${meta.montoObjetivo.toFixed(2)}</p>
+                                ${diasRestantes !== null ? `<p class="text-sm text-gray-500">${diasRestantes > 0 ? `${diasRestantes} días restantes` : 'Meta vencida'}</p>` : ''}
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-bold text-purple-600">${progreso.toFixed(1)}%</p>
+                                <button onclick="eliminarMeta(${meta.id})" class="text-red-500 hover:text-red-700 text-sm">🗑️</button>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="bg-purple-500 h-3 rounded-full transition-all duration-300" style="width: ${Math.min(progreso, 100)}%"></div>
+                        </div>
+                        <div class="mt-2 flex justify-between text-sm">
+                            <button onclick="actualizarAhorroMeta(${meta.id})" class="text-purple-600 hover:text-purple-800">💰 Actualizar ahorro</button>
+                            <span class="text-gray-500">Faltan S/ ${(meta.montoObjetivo - meta.ahorroActual).toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function actualizarPresupuesto() {
+            const tabla = document.getElementById('cuerpoTablaPresupuesto');
+            
+            if (presupuestos.length === 0) {
+                tabla.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No hay presupuestos configurados</td></tr>';
+                return;
+            }
+            
+            const mesActual = obtenerMesActual();
+            const gastosMes = filtrarPorMes(gastos, mesActual);
+            
+            tabla.innerHTML = presupuestos.map(presupuesto => {
+                const gastoReal = gastosMes
+                    .filter(gasto => gasto.categoria === presupuesto.categoria)
+                    .reduce((sum, gasto) => sum + gasto.monto, 0);
+                
+                const diferencia = presupuesto.monto - gastoReal;
+                const estado = diferencia >= 0 ? 'Dentro del presupuesto' : 'Presupuesto excedido';
+                const colorEstado = diferencia >= 0 ? 'text-green-600' : 'text-pink-600';
+                
+                return `
+                    <tr class="bg-white border-b hover:bg-gray-50">
+                        <td class="px-6 py-4 font-medium text-gray-900">${getCategoriaIcon(presupuesto.categoria)} ${presupuesto.categoria}</td>
+                        <td class="px-6 py-4">S/ ${presupuesto.monto.toFixed(2)}</td>
+                        <td class="px-6 py-4">S/ ${gastoReal.toFixed(2)}</td>
+                        <td class="px-6 py-4 ${diferencia >= 0 ? 'text-green-600' : 'text-pink-600'}">S/ ${diferencia.toFixed(2)}</td>
+                        <td class="px-6 py-4 ${colorEstado}">${estado}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function actualizarResumenAnual() {
+            const anioSeleccionado = document.getElementById('selectorAnio').value;
+            const tabla = document.getElementById('tablaResumenAnual');
+            
+            const meses = [
+                'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+            ];
+            
+            let totalIngresosAnual = 0;
+            let totalGastosAnual = 0;
+            let totalAhorroAnual = 0;
+            
+            const datosAnuales = [];
+            
+            tabla.innerHTML = meses.map((mes, index) => {
+                const mesNumero = String(index + 1).padStart(2, '0');
+                const fechaMes = `${anioSeleccionado}-${mesNumero}`;
+                
+                const ingresosMes = filtrarPorMes(ingresos, fechaMes);
+                const gastosMes = filtrarPorMes(gastos, fechaMes);
+                
+                const totalIngresos = ingresosMes.reduce((sum, ingreso) => sum + ingreso.monto, 0);
+                const totalGastos = gastosMes.reduce((sum, gasto) => sum + gasto.monto, 0);
+                const ahorro = totalIngresos > 0 ? totalIngresos - totalGastos : 0;
+                const balance = totalIngresos - totalGastos;
+                
+                totalIngresosAnual += totalIngresos;
+                totalGastosAnual += totalGastos;
+                totalAhorroAnual += ahorro;
+                
+                datosAnuales.push({
+                    mes,
+                    ingresos: totalIngresos,
+                    gastos: totalGastos,
+                    balance
+                });
+                
+                return `
+                    <tr class="bg-white border-b hover:bg-gray-50">
+                        <td class="px-6 py-4 font-medium text-gray-900">${mes}</td>
+                        <td class="px-6 py-4 text-green-600">S/ ${totalIngresos.toFixed(2)}</td>
+                        <td class="px-6 py-4 text-pink-600">S/ ${totalGastos.toFixed(2)}</td>
+                        <td class="px-6 py-4 text-purple-600">S/ ${ahorro.toFixed(2)}</td>
+                        <td class="px-6 py-4 ${balance >= 0 ? 'text-green-600' : 'text-red-600'}">S/ ${balance.toFixed(2)}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Actualizar totales
+            document.getElementById('totalIngresosAnual').textContent = `S/ ${totalIngresosAnual.toFixed(2)}`;
+            document.getElementById('totalGastosAnual').textContent = `S/ ${totalGastosAnual.toFixed(2)}`;
+            document.getElementById('totalAhorroAnual').textContent = `S/ ${totalAhorroAnual.toFixed(2)}`;
+            
+            const balanceAnual = totalIngresosAnual - totalGastosAnual;
+            const elementoBalance = document.getElementById('totalBalanceAnual');
+            elementoBalance.textContent = `S/ ${balanceAnual.toFixed(2)}`;
+            elementoBalance.className = `px-6 py-3 ${balanceAnual >= 0 ? 'text-green-600' : 'text-red-600'}`;
+            
+            // Actualizar gráfico de tendencia
+            actualizarGraficoTendenciaAnual(datosAnuales);
+        }
+
+        // Funciones de gráficos
+        function actualizarGraficoIngresos() {
+            const ctx = document.getElementById('ingresosChart').getContext('2d');
+            
+            if (ingresosChart) ingresosChart.destroy();
+            
+            // Obtener datos de los últimos 6 meses
+            const mesesData = [];
+            const ingresosData = [];
+            
+            for (let i = 5; i >= 0; i--) {
+                const fecha = new Date();
+                fecha.setMonth(fecha.getMonth() - i);
+                const mesStr = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+                const ingresosMes = filtrarPorMes(ingresos, mesStr);
+                const total = ingresosMes.reduce((sum, ingreso) => sum + ingreso.monto, 0);
+                
+                mesesData.push(fecha.toLocaleDateString('es-ES', { month: 'short' }));
+                ingresosData.push(total);
+            }
+            
+            ingresosChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: mesesData,
+                    datasets: [{
+                        label: 'Ingresos (S/)',
+                        data: ingresosData,
+                        borderColor: '#10B981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function actualizarGraficoGastos() {
+            const ctx = document.getElementById('gastosChart').getContext('2d');
+            
+            if (gastosChart) gastosChart.destroy();
+            
+            const gastosPorCategoria = {};
+            gastos.forEach(gasto => {
+                gastosPorCategoria[gasto.categoria] = (gastosPorCategoria[gasto.categoria] || 0) + gasto.monto;
+            });
+
+            const coloresRosa = [
+                '#F472B6', '#EC4899', '#DB2777', '#BE185D',
+                '#F9A8D4', '#F3E8FF', '#E879F9', '#C084FC'
+            ];
+
+            gastosChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(gastosPorCategoria),
+                    datasets: [{
+                        data: Object.values(gastosPorCategoria),
+                        backgroundColor: coloresRosa
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function actualizarGraficosResumen() {
+            // Gráfico comparativo
+            const ctxComparativo = document.getElementById('comparativoChart').getContext('2d');
+            
+            if (comparativoChart) comparativoChart.destroy();
+            
+            const mesActual = obtenerMesActual();
+            const ingresosMes = filtrarPorMes(ingresos, mesActual);
+            const gastosMes = filtrarPorMes(gastos, mesActual);
+            
+            const totalIngresosMes = ingresosMes.reduce((sum, ingreso) => sum + ingreso.monto, 0);
+            const totalGastosMes = gastosMes.reduce((sum, gasto) => sum + gasto.monto, 0);
+            const balance = totalIngresosMes - totalGastosMes;
+
+            comparativoChart = new Chart(ctxComparativo, {
+                type: 'bar',
+                data: {
+                    labels: ['Ingresos', 'Gastos', 'Balance'],
+                    datasets: [{
+                        data: [totalIngresosMes, totalGastosMes, balance],
+                        backgroundColor: ['#10B981', '#F472B6', balance >= 0 ? '#3B82F6' : '#EF4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de balance
+            const ctxBalance = document.getElementById('balanceChart').getContext('2d');
+            
+            if (balanceChart) balanceChart.destroy();
+            
+            const mesesData = [];
+            const balanceData = [];
+            
+            for (let i = 5; i >= 0; i--) {
+                const fecha = new Date();
+                fecha.setMonth(fecha.getMonth() - i);
+                const mesStr = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}`;
+                
+                const ingresosMes = filtrarPorMes(ingresos, mesStr);
+                const gastosMes = filtrarPorMes(gastos, mesStr);
+                
+                const totalIngresos = ingresosMes.reduce((sum, ingreso) => sum + ingreso.monto, 0);
+                const totalGastos = gastosMes.reduce((sum, gasto) => sum + gasto.monto, 0);
+                const balance = totalIngresos - totalGastos;
+                
+                mesesData.push(fecha.toLocaleDateString('es-ES', { month: 'short' }));
+                balanceData.push(balance);
+            }
+            
+            balanceChart = new Chart(ctxBalance, {
+                type: 'line',
+                data: {
+                    labels: mesesData,
+                    datasets: [{
+                        label: 'Balance (S/)',
+                        data: balanceData,
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function actualizarGraficoPresupuesto() {
+            const ctx = document.getElementById('presupuestoChart').getContext('2d');
+            
+            if (presupuestoChart) presupuestoChart.destroy();
+            
+            if (presupuestos.length === 0) return;
+            
+            const mesActual = obtenerMesActual();
+            const gastosMes = filtrarPorMes(gastos, mesActual);
+            
+            const categorias = [];
+            const presupuestosData = [];
+            const gastosRealesData = [];
+            
+            presupuestos.forEach(presupuesto => {
+                const gastoReal = gastosMes
+                    .filter(gasto => gasto.categoria === presupuesto.categoria)
+                    .reduce((sum, gasto) => sum + gasto.monto, 0);
+                
+                categorias.push(presupuesto.categoria);
+                presupuestosData.push(presupuesto.monto);
+                gastosRealesData.push(gastoReal);
+            });
+
+            presupuestoChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: categorias,
+                    datasets: [
+                        {
+                            label: 'Presupuesto Planeado',
+                            data: presupuestosData,
+                            backgroundColor: '#F3E8FF'
+                        },
+                        {
+                            label: 'Gasto Real',
+                            data: gastosRealesData,
+                            backgroundColor: '#F472B6'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function actualizarGraficoTendenciaAnual(datosAnuales) {
+            const ctx = document.getElementById('tendenciaAnualChart').getContext('2d');
+            
+            if (tendenciaAnualChart) tendenciaAnualChart.destroy();
+            
+            const meses = datosAnuales.map(d => d.mes);
+            const ingresos = datosAnuales.map(d => d.ingresos);
+            const gastos = datosAnuales.map(d => d.gastos);
+            const balance = datosAnuales.map(d => d.balance);
+
+            tendenciaAnualChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: meses,
+                    datasets: [
+                        {
+                            label: 'Ingresos (S/)',
+                            data: ingresos,
+                            borderColor: '#10B981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Gastos (S/)',
+                            data: gastos,
+                            borderColor: '#F472B6',
+                            backgroundColor: 'rgba(244, 114, 182, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Balance (S/)',
+                            data: balance,
+                            borderColor: '#3B82F6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Funciones auxiliares
+        function getFuenteIcon(fuente) {
+            const iconos = {
+                'Sueldo': '💼',
+                'Freelance': '💻',
+                'Venta': '🛍️',
+                'Inversión': '📈',
+                'Bono': '🎁',
+                'Otros': '📦'
+            };
+            return iconos[fuente] || '📦';
+        }
+
+        function getCategoriaIcon(categoria) {
+            const iconos = {
+                'Alimentación': '🍽️',
+                'Transporte': '🚗',
+                'Ocio': '🎬',
+                'Salud': '🏥',
+                'Servicios': '💡',
+                'Compras': '🛍️',
+                'Educación': '📚',
+                'Otros': '📦'
+            };
+            return iconos[categoria] || '📦';
+        }
+
+        function formatearFecha(fecha) {
+            return new Date(fecha).toLocaleDateString('es-ES', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+        }
+
+        // Funciones de eliminación
+        function eliminarIngreso(id) {
+            ingresos = ingresos.filter(ingreso => ingreso.id !== id);
+            guardarDatos();
+            actualizarTodo();
+        }
+
+        function eliminarGasto(id) {
+            gastos = gastos.filter(gasto => gasto.id !== id);
+            guardarDatos();
+            actualizarTodo();
+        }
+
+        function eliminarMeta(id) {
+            metas = metas.filter(meta => meta.id !== id);
+            guardarDatos();
+            actualizarMetas();
+        }
+
+        function actualizarAhorroMeta(id) {
+            const meta = metas.find(m => m.id === id);
+            if (meta) {
+                const nuevoAhorro = prompt(`Ingresa el nuevo monto ahorrado para "${meta.nombre}":`, meta.ahorroActual);
+                if (nuevoAhorro !== null && !isNaN(nuevoAhorro)) {
+                    meta.ahorroActual = parseFloat(nuevoAhorro);
+                    guardarDatos();
+                    actualizarMetas();
+                }
+            }
+        }
+
+        // Inicializar aplicación
+        actualizarTodo();
+        actualizarResumenAnual();
+        setTimeout(() => {
+            actualizarGraficoIngresos();
+            actualizarGraficoGastos();
+        }, 100);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98f8ba2d7219c2e5',t:'MTc2MDYyOTk4Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+
