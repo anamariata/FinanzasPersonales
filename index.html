@@ -835,7 +835,17 @@
             // Actualizar gráfico de tendencia
             actualizarGraficoTendenciaAnual(datosAnuales);
         }
-
+        const ticksSoles = {
+                  callback: (v) => 'S/ ' + Number(v).toLocaleString('es-PE')
+                };
+                
+                function maxEjeSoles(values) {
+                  const max = Math.max(0, ...values);
+                  if (max === 0) return 100;                 // un mínimo “bonito”
+                  const pow = Math.pow(10, Math.floor(Math.log10(max)));
+                  const headroom = 1.1;                      // 10% de holgura
+                  return Math.ceil((max * headroom) / pow) * pow;
+                }
         // Funciones de gráficos
         function actualizarGraficoIngresos() {
             const ctx = document.getElementById('ingresosChart').getContext('2d');
@@ -856,7 +866,7 @@
                 mesesData.push(fecha.toLocaleDateString('es-ES', { month: 'short' }));
                 ingresosData.push(total);
             }
-            
+            const maxY = maxEjeSoles(ingresosData);
             ingresosChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -936,7 +946,8 @@
             const totalIngresosMes = ingresosMes.reduce((sum, ingreso) => sum + ingreso.monto, 0);
             const totalGastosMes = gastosMes.reduce((sum, gasto) => sum + gasto.monto, 0);
             const balance = totalIngresosMes - totalGastosMes;
-
+            
+            const maxY = maxEjeSoles([totalIngresosMes, totalGastosMes, balance]);
             comparativoChart = new Chart(ctxComparativo, {
                 type: 'bar',
                 data: {
@@ -985,7 +996,7 @@
                 mesesData.push(fecha.toLocaleDateString('es-ES', { month: 'short' }));
                 balanceData.push(balance);
             }
-            
+            const maxY = maxEjeSoles(balanceData);
             balanceChart = new Chart(ctxBalance, {
                 type: 'line',
                 data: {
@@ -1015,7 +1026,7 @@
                 }
             });
         }
-
+        
         function actualizarGraficoPresupuesto() {
             const ctx = document.getElementById('presupuestoChart').getContext('2d');
             
@@ -1039,7 +1050,7 @@
                 presupuestosData.push(presupuesto.monto);
                 gastosRealesData.push(gastoReal);
             });
-
+            const maxY = maxEjeSoles([...presupuestosData, ...gastosRealesData]);
             presupuestoChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1083,7 +1094,7 @@
             const ingresos = datosAnuales.map(d => d.ingresos);
             const gastos = datosAnuales.map(d => d.gastos);
             const balance = datosAnuales.map(d => d.balance);
-
+            const maxY = maxEjeSoles([...ingresos, ...gastos, ...balance]);
             tendenciaAnualChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -1165,22 +1176,58 @@
         }
 
         // Funciones de eliminación
-        function eliminarIngreso(id) {
-            ingresos = ingresos.filter(ingreso => ingreso.id !== id);
+        async function eliminarIngreso(id) {
+           ingresos = ingresos.filter(ingreso => ingreso.id !== id);
             guardarDatos();
             actualizarTodo();
+
+        try {
+            if (window.db && window.auth && auth.currentUser) {
+              const q = query(
+                collection(db, "users", auth.currentUser.uid, "ingresos"),
+                where("idLocal", "==", id)
+              );
+              const snap = await getDocs(q);
+              for (const d of snap.docs) { await deleteDoc(doc(db, d.ref.path));
+            }
+            }
+          } catch (e) { console.warn("No se pudo borrar en Firestore:", e); }
         }
 
-        function eliminarGasto(id) {
+        async function eliminarGasto(id) {
             gastos = gastos.filter(gasto => gasto.id !== id);
-            guardarDatos();
-            actualizarTodo();
+              guardarDatos();
+              actualizarTodo();
+            
+              try {
+                if (window.db && window.auth && auth.currentUser) {
+                  const q = query(
+                    collection(db, "users", auth.currentUser.uid, "gastos"),
+                    where("idLocal", "==", id)
+                  );
+                  const snap = await getDocs(q);
+                  for (const d of snap.docs) { await deleteDoc(doc(db, d.ref.path));
+                    }
+                }
+              } catch (e) { console.warn("No se pudo borrar en Firestore:", e); }
         }
 
-        function eliminarMeta(id) {
+        async function eliminarMeta(id) {
             metas = metas.filter(meta => meta.id !== id);
-            guardarDatos();
-            actualizarMetas();
+              guardarDatos();
+              actualizarMetas();
+            
+              try {
+                if (window.db && window.auth && auth.currentUser) {
+                  const q = query(
+                    collection(db, "users", auth.currentUser.uid, "metas"),
+                    where("idLocal", "==", id)
+                  );
+                  const snap = await getDocs(q);
+                  for (const d of snap.docs) { await deleteDoc(doc(db, d.ref.path));
+                    }
+                 }
+              } catch (e) { console.warn("No se pudo borrar en Firestore:", e); }
         }
 
         function actualizarAhorroMeta(id) {
@@ -1203,6 +1250,38 @@
             actualizarGraficoGastos();
         }, 100);
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98f8ba2d7219c2e5',t:'MTc2MDYyOTk4Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBSzlw4x7pfvpzm4Eut3UAKYr1QtPyNeWg",
+      authDomain: "finanzaspersonales-51acf.firebaseapp.com",
+      projectId: "finanzaspersonales-51acf",
+      storageBucket: "finanzaspersonales-51acf.appspot.com",
+      messagingSenderId: "1078068927249",
+      appId: "1:1078068927249:web:fcf8648461897765baed60",
+      measurementId: "G-6GYDFNBS7Z"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+// 👇 HAZ visibles db y auth para el primer <script>
+      window.db = db;
+      window.auth = auth;
+    onAuthStateChanged(auth, async (user) => { if (!user) await signInAnonymously(auth); });
+
+    // Prueba rápida:
+    window.guardarEnNube = async () => {
+      const ref = collection(db, "prueba");
+      await addDoc(ref, { mensaje: "Hola desde FinanzasPersonales", fecha: new Date() });
+      alert("✅ Guardado en Firebase correctamente");
+    };
+  </script>
+</body>
+
 </html>
+
 
