@@ -1313,8 +1313,42 @@
 // 👇 HAZ visibles db y auth para el primer <script>
       window.db = db;
       window.auth = auth;
-    onAuthStateChanged(auth, async (user) => { if (!user) await signInAnonymously(auth); });
-
+    
+    async function cargarDatosDesdeFirestore() {
+      const user = auth.currentUser;
+      if (!user) return;
+      const uid = user.uid;
+    
+      // Utilidad para mapear documentos
+      const toArray = (snap) => snap.docs.map(d => ({ ...d.data() }));
+    
+      const [ingSnap, gasSnap, metSnap, preSnap] = await Promise.all([
+        getDocs(collection(db, "users", uid, "ingresos")),
+        getDocs(collection(db, "users", uid, "gastos")),
+        getDocs(collection(db, "users", uid, "metas")),
+        getDocs(collection(db, "users", uid, "presupuestos")),
+      ]);
+    
+      // Sobrescribe los arrays globales del primer <script>
+      window.ingresos      = toArray(ingSnap);
+      window.gastos        = toArray(gasSnap);
+      window.metas         = toArray(metSnap);
+      window.presupuestos  = toArray(preSnap);
+    
+      // Persiste en localStorage y refresca UI (funciones del primer <script>)
+      window.guardarDatos?.();
+      window.actualizarTodo?.();
+      window.actualizarResumenAnual?.();
+    }
+    
+    // Espera al login anónimo y luego carga datos
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        await signInAnonymously(auth);
+        return;
+      }
+      await cargarDatosDesdeFirestore();
+    });
     // Prueba rápida:
     window.guardarEnNube = async () => {
       const ref = collection(db, "prueba");
@@ -1325,6 +1359,7 @@
 </body>
 
 </html>
+
 
 
 
