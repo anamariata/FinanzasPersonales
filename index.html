@@ -483,7 +483,18 @@
             document.getElementById('ingresoForm').reset();
             document.getElementById('fechaIngreso').valueAsDate = new Date();
         });
-
+        try {
+            if (auth.currentUser) {
+              await addDoc(
+                collection(db, "users", auth.currentUser.uid, "ingresos"),
+                { idLocal: nuevoIngreso.id, ...nuevoIngreso, createdAt: new Date() }
+              );
+            }
+          } catch (err) {
+            console.warn("No se pudo guardar ingreso en Firestore:", err);
+          }
+        });
+        
         document.getElementById('gastoForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
@@ -503,7 +514,17 @@
             document.getElementById('gastoForm').reset();
             document.getElementById('fechaGasto').valueAsDate = new Date();
         });
-
+        try {
+            if (auth.currentUser) {
+              await addDoc(
+                collection(db, "users", auth.currentUser.uid, "gastos"),
+                { idLocal: nuevoGasto.id, ...nuevoGasto, createdAt: new Date() }
+              );
+            }
+          } catch (err) {
+            console.warn("No se pudo guardar gasto en Firestore:", err);
+          }
+        });
         document.getElementById('metaForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
@@ -520,7 +541,17 @@
             actualizarMetas();
             document.getElementById('metaForm').reset();
         });
-
+        try {
+            if (auth.currentUser) {
+              await addDoc(
+                collection(db, "users", auth.currentUser.uid, "metas"),
+                { idLocal: nuevaMeta.id, ...nuevaMeta, createdAt: new Date() }
+              );
+            }
+          } catch (err) {
+            console.warn("No se pudo guardar meta en Firestore:", err);
+          }
+        });
         document.getElementById('presupuestoForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
@@ -543,7 +574,18 @@
             actualizarPresupuesto();
             document.getElementById('presupuestoForm').reset();
         });
-
+        // 👉 Guardar también en Firestore
+          try {
+            if (auth.currentUser) {
+              await addDoc(
+                collection(db, "users", auth.currentUser.uid, "presupuestos"),
+                { idLocal: presupuestoDoc.id, ...presupuestoDoc, createdAt: new Date() }
+              );
+            }
+          } catch (err) {
+            console.warn("No se pudo guardar presupuesto en Firestore:", err);
+          }
+        });
         // Selector de año
         document.getElementById('selectorAnio').addEventListener('change', actualizarResumenAnual);
 
@@ -1283,6 +1325,7 @@
 </body>
 
 </html>
+
 
 
 
