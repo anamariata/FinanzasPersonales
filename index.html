@@ -1319,6 +1319,7 @@
 // 👇 HAZ visibles db y auth para el primer <script>
       window.db = db;
       window.auth = auth;
+    window.fs = { addDoc, collection, query, where, getDocs, deleteDoc, doc };
     onAuthStateChanged(auth, async (user) => { if (!user) await signInAnonymously(auth); });
     async function cargarDatosDesdeFirestore() {
       const user = auth.currentUser;
@@ -1365,6 +1366,7 @@
 </body>
 
 </html>
+
 
 
 
