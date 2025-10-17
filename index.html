@@ -423,6 +423,9 @@
         window.gastos = gastos;
         window.metas = metas;
         window.presupuestos = presupuestos;
+        window.fs = { addDoc, collection, query, where, getDocs, deleteDoc, doc };
+        window.db = db;
+        window.auth = auth;
         // Charts globales
         let ingresosChart, gastosChart, comparativoChart, balanceChart, presupuestoChart, tendenciaAnualChart;
 
@@ -1362,6 +1365,7 @@
 </body>
 
 </html>
+
 
 
 
