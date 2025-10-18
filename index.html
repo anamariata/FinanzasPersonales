@@ -430,11 +430,11 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
-// Variables globales - SE MANTIENE IGUAL
-        let ingresos = JSON.parse(localStorage.getItem('ingresos')) || [];
-        let gastos = JSON.parse(localStorage.getItem('gastos')) || [];
-        let metas = JSON.parse(localStorage.getItem('metas')) || [];
-        let presupuestos = JSON.parse(localStorage.getItem('presupuestos')) || [];
+// Variables globales - MODIFICADO: Solo arrays vacíos, sin localStorage
+        let ingresos = [];
+        let gastos = [];
+        let metas = [];
+        let presupuestos = [];
         
         // Charts globales - SE MANTIENE IGUAL
         let ingresosChart, gastosChart, comparativoChart, balanceChart, presupuestoChart, tendenciaAnualChart;
@@ -444,13 +444,7 @@
         document.getElementById('fechaGasto').valueAsDate = new Date();
         document.getElementById('anioActual').textContent = new Date().getFullYear();
 
-        // Funciones de almacenamiento - SE MANTIENE IGUAL
-        function guardarDatos() {
-            localStorage.setItem('ingresos', JSON.stringify(ingresos));
-            localStorage.setItem('gastos', JSON.stringify(gastos));
-            localStorage.setItem('metas', JSON.stringify(metas));
-            localStorage.setItem('presupuestos', JSON.stringify(presupuestos));
-        }
+        // ELIMINADO: Función guardarDatos() - Ya no usamos localStorage
 
         // Navegación por pestañas - SE MANTIENE IGUAL
         document.querySelectorAll('.tab-button').forEach(button => {
@@ -478,34 +472,33 @@
             });
         });
 
-        // Formularios - MODIFICADO: Se eliminaron los await incorrectos y se reestructuró para usar Firebase correctamente
+        // Formularios - MODIFICADO: Solo guarda en Firebase, no en localStorage
         document.getElementById('ingresoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const nuevoIngreso = {
-                id: Date.now(),
+                id: Date.now(), // ID temporal local
                 fecha: document.getElementById('fechaIngreso').value,
                 fuente: document.getElementById('fuenteIngreso').value,
                 monto: parseFloat(document.getElementById('montoIngreso').value),
                 tipo: document.getElementById('tipoIngreso').value,
                 metodoPago: document.getElementById('metodoPagoIngreso').value,
-                comentarios: document.getElementById('comentariosIngreso').value
+                comentarios: document.getElementById('comentariosIngreso').value,
+                createdAt: new Date()
             };
             
-            ingresos.push(nuevoIngreso);
-            guardarDatos();
-            actualizarTodo();
-            
-            // Guardar en Firebase - CORREGIDO: Se movió dentro de la función async
+            // SOLO Firebase - ELIMINADO: guardarDatos() y push a array local
             try {
                 if (auth.currentUser) {
                     await addDoc(
                         collection(db, "users", auth.currentUser.uid, "ingresos"),
-                        { idLocal: nuevoIngreso.id, ...nuevoIngreso, createdAt: new Date() }
+                        nuevoIngreso
                     );
+                    // La actualización de la UI se hará automáticamente con onSnapshot
                 }
             } catch (err) {
                 console.warn("No se pudo guardar ingreso en Firestore:", err);
+                alert("Error al guardar el ingreso. Intenta nuevamente.");
             }
             
             document.getElementById('ingresoForm').reset();
@@ -516,29 +509,28 @@
             e.preventDefault();
             
             const nuevoGasto = {
-                id: Date.now(),
+                id: Date.now(), // ID temporal local
                 fecha: document.getElementById('fechaGasto').value,
                 categoria: document.getElementById('categoriaGasto').value,
                 descripcion: document.getElementById('descripcionGasto').value,
                 monto: parseFloat(document.getElementById('montoGasto').value),
                 metodoPago: document.getElementById('metodoPagoGasto').value,
-                tipo: document.getElementById('tipoGasto').value
+                tipo: document.getElementById('tipoGasto').value,
+                createdAt: new Date()
             };
             
-            gastos.push(nuevoGasto);
-            guardarDatos();
-            actualizarTodo();
-            
-            // Guardar en Firebase - CORREGIDO: Se movió dentro de la función async
+            // SOLO Firebase - ELIMINADO: guardarDatos() y push a array local
             try {
                 if (auth.currentUser) {
                     await addDoc(
                         collection(db, "users", auth.currentUser.uid, "gastos"),
-                        { idLocal: nuevoGasto.id, ...nuevoGasto, createdAt: new Date() }
+                        nuevoGasto
                     );
+                    // La actualización de la UI se hará automáticamente con onSnapshot
                 }
             } catch (err) {
                 console.warn("No se pudo guardar gasto en Firestore:", err);
+                alert("Error al guardar el gasto. Intenta nuevamente.");
             }
             
             document.getElementById('gastoForm').reset();
@@ -549,27 +541,26 @@
             e.preventDefault();
             
             const nuevaMeta = {
-                id: Date.now(),
+                id: Date.now(), // ID temporal local
                 nombre: document.getElementById('nombreMeta').value,
                 montoObjetivo: parseFloat(document.getElementById('montoObjetivo').value),
                 ahorroActual: parseFloat(document.getElementById('ahorroActual').value) || 0,
-                fechaLimite: document.getElementById('fechaLimite').value
+                fechaLimite: document.getElementById('fechaLimite').value,
+                createdAt: new Date()
             };
             
-            metas.push(nuevaMeta);
-            guardarDatos();
-            actualizarMetas();
-            
-            // Guardar en Firebase - CORREGIDO: Se movió dentro de la función async
+            // SOLO Firebase - ELIMINADO: guardarDatos() y push a array local
             try {
                 if (auth.currentUser) {
                     await addDoc(
                         collection(db, "users", auth.currentUser.uid, "metas"),
-                        { idLocal: nuevaMeta.id, ...nuevaMeta, createdAt: new Date() }
+                        nuevaMeta
                     );
+                    // La actualización de la UI se hará automáticamente con onSnapshot
                 }
             } catch (err) {
                 console.warn("No se pudo guardar meta en Firestore:", err);
+                alert("Error al guardar la meta. Intenta nuevamente.");
             }
             
             document.getElementById('metaForm').reset();
@@ -578,37 +569,25 @@
         document.getElementById('presupuestoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const categoria = document.getElementById('categoriaPresupuesto').value;
-            const monto = parseFloat(document.getElementById('montoPresupuesto').value);
+            const presupuestoDoc = {
+                id: Date.now(), // ID temporal local
+                categoria: document.getElementById('categoriaPresupuesto').value,
+                monto: parseFloat(document.getElementById('montoPresupuesto').value),
+                createdAt: new Date()
+            };
             
-            const existente = presupuestos.findIndex(p => p.categoria === categoria);
-            let presupuestoDoc;
-            
-            if (existente !== -1) {
-                presupuestos[existente].monto = monto;
-                presupuestoDoc = presupuestos[existente];
-            } else {
-                presupuestoDoc = {
-                    id: Date.now(),
-                    categoria,
-                    monto
-                };
-                presupuestos.push(presupuestoDoc);
-            }
-            
-            guardarDatos();
-            actualizarPresupuesto();
-            
-            // Guardar en Firebase - CORREGIDO: Se movió dentro de la función async
+            // SOLO Firebase - ELIMINADO: guardarDatos() y lógica de actualización local
             try {
                 if (auth.currentUser) {
                     await addDoc(
                         collection(db, "users", auth.currentUser.uid, "presupuestos"),
-                        { idLocal: presupuestoDoc.id, ...presupuestoDoc, createdAt: new Date() }
+                        presupuestoDoc
                     );
+                    // La actualización de la UI se hará automáticamente con onSnapshot
                 }
             } catch (err) {
                 console.warn("No se pudo guardar presupuesto en Firestore:", err);
+                alert("Error al guardar el presupuesto. Intenta nuevamente.");
             }
             
             document.getElementById('presupuestoForm').reset();
@@ -617,7 +596,7 @@
         // Selector de año - SE MANTIENE IGUAL
         document.getElementById('selectorAnio').addEventListener('change', actualizarResumenAnual);
 
-        // Funciones de actualización - SE MANTIENE IGUAL
+        // Funciones de actualización - SE MANTIENE IGUAL (solo la lógica de UI)
         function actualizarTodo() {
             actualizarIngresos();
             actualizarGastos();
@@ -666,7 +645,7 @@
                     </div>
                     <div class="flex items-center gap-3">
                         <span class="text-xl font-bold text-green-600">S/ ${ingreso.monto.toFixed(2)}</span>
-                        <button onclick="eliminarIngreso(${ingreso.id})" class="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition duration-200">🗑️</button>
+                        <button onclick="eliminarIngreso('${ingreso.id}')" class="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition duration-200">🗑️</button>
                     </div>
                 </div>
             `).join('');
@@ -716,7 +695,7 @@
                     </div>
                     <div class="flex items-center gap-3">
                         <span class="text-xl font-bold text-pink-600">S/ ${gasto.monto.toFixed(2)}</span>
-                        <button onclick="eliminarGasto(${gasto.id})" class="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition duration-200">🗑️</button>
+                        <button onclick="eliminarGasto('${gasto.id}')" class="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition duration-200">🗑️</button>
                     </div>
                 </div>
             `).join('');
@@ -794,14 +773,14 @@
                             </div>
                             <div class="text-right">
                                 <p class="text-2xl font-bold text-purple-600">${progreso.toFixed(1)}%</p>
-                                <button onclick="eliminarMeta(${meta.id})" class="text-red-500 hover:text-red-700 text-sm">🗑️</button>
+                                <button onclick="eliminarMeta('${meta.id}')" class="text-red-500 hover:text-red-700 text-sm">🗑️</button>
                             </div>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-3">
                             <div class="bg-purple-500 h-3 rounded-full transition-all duration-300" style="width: ${Math.min(progreso, 100)}%"></div>
                         </div>
                         <div class="mt-2 flex justify-between text-sm">
-                            <button onclick="actualizarAhorroMeta(${meta.id})" class="text-purple-600 hover:text-purple-800">💰 Actualizar ahorro</button>
+                            <button onclick="actualizarAhorroMeta('${meta.id}')" class="text-purple-600 hover:text-purple-800">💰 Actualizar ahorro</button>
                             <span class="text-gray-500">Faltan S/ ${(meta.montoObjetivo - meta.ahorroActual).toFixed(2)}</span>
                         </div>
                     </div>
@@ -1227,133 +1206,147 @@
             });
         }
 
-        // Funciones de eliminación - MODIFICADO: Se hicieron async y se corrigió la estructura
+        // Funciones de eliminación - MODIFICADO: Solo elimina de Firebase
         window.eliminarIngreso = async function(id) {
-            ingresos = ingresos.filter(ingreso => ingreso.id !== id);
-            guardarDatos();
-            actualizarTodo();
-
             try {
                 if (auth.currentUser) {
                     const q = query(
                         collection(db, "users", auth.currentUser.uid, "ingresos"),
-                        where("idLocal", "==", id)
+                        where("id", "==", id)
                     );
                     const snap = await getDocs(q);
                     for (const d of snap.docs) { 
                         await deleteDoc(doc(db, d.ref.path));
                     }
+                    // La actualización de la UI se hará automáticamente con onSnapshot
                 }
             } catch (e) { 
                 console.warn("No se pudo borrar en Firestore:", e); 
+                alert("Error al eliminar el ingreso. Intenta nuevamente.");
             }
         }
 
         window.eliminarGasto = async function(id) {
-            gastos = gastos.filter(gasto => gasto.id !== id);
-            guardarDatos();
-            actualizarTodo();
-            
             try {
                 if (auth.currentUser) {
                     const q = query(
                         collection(db, "users", auth.currentUser.uid, "gastos"),
-                        where("idLocal", "==", id)
+                        where("id", "==", id)
                     );
                     const snap = await getDocs(q);
                     for (const d of snap.docs) { 
                         await deleteDoc(doc(db, d.ref.path));
                     }
+                    // La actualización de la UI se hará automáticamente con onSnapshot
                 }
             } catch (e) { 
                 console.warn("No se pudo borrar en Firestore:", e); 
+                alert("Error al eliminar el gasto. Intenta nuevamente.");
             }
         }
 
         window.eliminarMeta = async function(id) {
-            metas = metas.filter(meta => meta.id !== id);
-            guardarDatos();
-            actualizarMetas();
-            
             try {
                 if (auth.currentUser) {
                     const q = query(
                         collection(db, "users", auth.currentUser.uid, "metas"),
-                        where("idLocal", "==", id)
+                        where("id", "==", id)
                     );
                     const snap = await getDocs(q);
                     for (const d of snap.docs) { 
                         await deleteDoc(doc(db, d.ref.path));
                     }
+                    // La actualización de la UI se hará automáticamente con onSnapshot
                 }
             } catch (e) { 
                 console.warn("No se pudo borrar en Firestore:", e); 
+                alert("Error al eliminar la meta. Intenta nuevamente.");
             }
         }
 
-        window.actualizarAhorroMeta = function(id) {
+        window.actualizarAhorroMeta = async function(id) {
             const meta = metas.find(m => m.id === id);
             if (meta) {
                 const nuevoAhorro = prompt(`Ingresa el nuevo monto ahorrado para "${meta.nombre}":`, meta.ahorroActual);
                 if (nuevoAhorro !== null && !isNaN(nuevoAhorro)) {
-                    meta.ahorroActual = parseFloat(nuevoAhorro);
-                    guardarDatos();
-                    actualizarMetas();
+                    try {
+                        if (auth.currentUser) {
+                            const q = query(
+                                collection(db, "users", auth.currentUser.uid, "metas"),
+                                where("id", "==", id)
+                            );
+                            const snap = await getDocs(q);
+                            for (const d of snap.docs) { 
+                                await deleteDoc(doc(db, d.ref.path));
+                                // Crear nuevo documento con el ahorro actualizado
+                                await addDoc(
+                                    collection(db, "users", auth.currentUser.uid, "metas"),
+                                    { ...meta, ahorroActual: parseFloat(nuevoAhorro) }
+                                );
+                            }
+                        }
+                    } catch (e) {
+                        console.warn("No se pudo actualizar en Firestore:", e);
+                        alert("Error al actualizar el ahorro. Intenta nuevamente.");
+                    }
                 }
             }
         }
 
-        // Función para cargar datos desde Firestore - NUEVA: Se agregó esta función
-        async function cargarDatosDesdeFirestore() {
-            const user = auth.currentUser;
-            if (!user) return;
-            const uid = user.uid;
-            
-            const toArray = (snap) => snap.docs.map(d => ({ ...d.data() }));
-            
-            try {
-                const [ingSnap, gasSnap, metSnap, preSnap] = await Promise.all([
-                    getDocs(collection(db, "users", uid, "ingresos")),
-                    getDocs(collection(db, "users", uid, "gastos")),
-                    getDocs(collection(db, "users", uid, "metas")),
-                    getDocs(collection(db, "users", uid, "presupuestos")),
-                ]);
-                
-                ingresos = toArray(ingSnap);
-                gastos = toArray(gasSnap);
-                metas = toArray(metSnap);
-                presupuestos = toArray(preSnap);
-                
-                guardarDatos();
-                actualizarTodo();
-                actualizarResumenAnual();
-            } catch (error) {
-                console.warn("Error cargando datos desde Firestore:", error);
-            }
+        // NUEVO: Configurar listeners en tiempo real con onSnapshot
+        function configurarListenersTiempoReal(uid) {
+            // Listener para ingresos
+            onSnapshot(collection(db, "users", uid, "ingresos"), (snapshot) => {
+                ingresos = snapshot.docs.map(doc => ({ ...doc.data(), firebaseId: doc.id }));
+                actualizarIngresos();
+                actualizarResumen();
+                actualizarGraficoIngresos();
+            });
+
+            // Listener para gastos
+            onSnapshot(collection(db, "users", uid, "gastos"), (snapshot) => {
+                gastos = snapshot.docs.map(doc => ({ ...doc.data(), firebaseId: doc.id }));
+                actualizarGastos();
+                actualizarResumen();
+                actualizarGraficoGastos();
+            });
+
+            // Listener para metas
+            onSnapshot(collection(db, "users", uid, "metas"), (snapshot) => {
+                metas = snapshot.docs.map(doc => ({ ...doc.data(), firebaseId: doc.id }));
+                actualizarMetas();
+            });
+
+            // Listener para presupuestos
+            onSnapshot(collection(db, "users", uid, "presupuestos"), (snapshot) => {
+                presupuestos = snapshot.docs.map(doc => ({ ...doc.data(), firebaseId: doc.id }));
+                actualizarPresupuesto();
+                actualizarGraficoPresupuesto();
+            });
         }
 
-        // Inicializar aplicación - MODIFICADO: Se agregó la carga de datos desde Firestore
+        // Inicializar aplicación - MODIFICADO: Solo Firebase
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 await signInAnonymously(auth);
                 return;
             }
-            await cargarDatosDesdeFirestore();
+            
+            // Configurar listeners en tiempo real
+            configurarListenersTiempoReal(user.uid);
             
             // Inicializar gráficos después de cargar datos
             setTimeout(() => {
                 actualizarGraficoIngresos();
                 actualizarGraficoGastos();
-            }, 100);
+                actualizarResumenAnual();
+            }, 500);
         });
-
-        // Inicializar con datos locales mientras se cargan de Firestore
-        actualizarTodo();
-        actualizarResumenAnual();
   </script>
 </body>
 
 </html>
+
 
 
 
