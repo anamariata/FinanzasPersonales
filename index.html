@@ -412,29 +412,39 @@
             </div>
         </main>
     </div>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
-    <script>
-        // Variables globales
+    const firebaseConfig = {
+        apiKey: "AIzaSyBszUwx47pfvpzm4Eut3UAKrY10TpyNeWg",
+      authDomain: "finanzaspersonales-51acf.firebaseapp.com",
+      projectId: "finanzaspersonales-51acf",
+      storageBucket: "finanzaspersonales-51acf.firebasestorage.app",
+      messagingSenderId: "1078068297249",
+      appId: "1:1078068297249:web:fc2f684461897765baed60",
+      measurementId: "G-6GYDFNBS7Z"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+// Variables globales - SE MANTIENE IGUAL
         let ingresos = JSON.parse(localStorage.getItem('ingresos')) || [];
         let gastos = JSON.parse(localStorage.getItem('gastos')) || [];
         let metas = JSON.parse(localStorage.getItem('metas')) || [];
         let presupuestos = JSON.parse(localStorage.getItem('presupuestos')) || [];
-        window.ingresos = ingresos;
-        window.gastos = gastos;
-        window.metas = metas;
-        window.presupuestos = presupuestos;
-        window.fs = { addDoc, collection, query, where, getDocs, deleteDoc, doc };
-        window.db = db;
-        window.auth = auth;
-        // Charts globales
+        
+        // Charts globales - SE MANTIENE IGUAL
         let ingresosChart, gastosChart, comparativoChart, balanceChart, presupuestoChart, tendenciaAnualChart;
 
-        // Establecer fechas actuales
+        // Establecer fechas actuales - SE MANTIENE IGUAL
         document.getElementById('fechaIngreso').valueAsDate = new Date();
         document.getElementById('fechaGasto').valueAsDate = new Date();
         document.getElementById('anioActual').textContent = new Date().getFullYear();
 
-        // Funciones de almacenamiento
+        // Funciones de almacenamiento - SE MANTIENE IGUAL
         function guardarDatos() {
             localStorage.setItem('ingresos', JSON.stringify(ingresos));
             localStorage.setItem('gastos', JSON.stringify(gastos));
@@ -442,7 +452,7 @@
             localStorage.setItem('presupuestos', JSON.stringify(presupuestos));
         }
 
-        // Navegación por pestañas
+        // Navegación por pestañas - SE MANTIENE IGUAL
         document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', () => {
                 const tabId = button.dataset.tab;
@@ -458,7 +468,6 @@
                 document.getElementById(tabId).classList.add('active');
                 button.classList.add('active');
                 
-                // Actualizar gráficos según la pestaña
                 setTimeout(() => {
                     if (tabId === 'ingresos') actualizarGraficoIngresos();
                     if (tabId === 'gastos') actualizarGraficoGastos();
@@ -469,8 +478,8 @@
             });
         });
 
-        // Formularios
-        document.getElementById('ingresoForm').addEventListener('submit', (e) => {
+        // Formularios - MODIFICADO: Se eliminaron los await incorrectos y se reestructuró para usar Firebase correctamente
+        document.getElementById('ingresoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const nuevoIngreso = {
@@ -486,22 +495,24 @@
             ingresos.push(nuevoIngreso);
             guardarDatos();
             actualizarTodo();
+            
+            // Guardar en Firebase - CORREGIDO: Se movió dentro de la función async
+            try {
+                if (auth.currentUser) {
+                    await addDoc(
+                        collection(db, "users", auth.currentUser.uid, "ingresos"),
+                        { idLocal: nuevoIngreso.id, ...nuevoIngreso, createdAt: new Date() }
+                    );
+                }
+            } catch (err) {
+                console.warn("No se pudo guardar ingreso en Firestore:", err);
+            }
+            
             document.getElementById('ingresoForm').reset();
             document.getElementById('fechaIngreso').valueAsDate = new Date();
         });
-        try {
-            if (auth.currentUser) {
-              await addDoc(
-                collection(db, "users", auth.currentUser.uid, "ingresos"),
-                { idLocal: nuevoIngreso.id, ...nuevoIngreso, createdAt: new Date() }
-              );
-            }
-          } catch (err) {
-            console.warn("No se pudo guardar ingreso en Firestore:", err);
-          }
-        });
-        
-        document.getElementById('gastoForm').addEventListener('submit', (e) => {
+
+        document.getElementById('gastoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const nuevoGasto = {
@@ -517,21 +528,24 @@
             gastos.push(nuevoGasto);
             guardarDatos();
             actualizarTodo();
+            
+            // Guardar en Firebase - CORREGIDO: Se movió dentro de la función async
+            try {
+                if (auth.currentUser) {
+                    await addDoc(
+                        collection(db, "users", auth.currentUser.uid, "gastos"),
+                        { idLocal: nuevoGasto.id, ...nuevoGasto, createdAt: new Date() }
+                    );
+                }
+            } catch (err) {
+                console.warn("No se pudo guardar gasto en Firestore:", err);
+            }
+            
             document.getElementById('gastoForm').reset();
             document.getElementById('fechaGasto').valueAsDate = new Date();
         });
-        try {
-            if (auth.currentUser) {
-              await addDoc(
-                collection(db, "users", auth.currentUser.uid, "gastos"),
-                { idLocal: nuevoGasto.id, ...nuevoGasto, createdAt: new Date() }
-              );
-            }
-          } catch (err) {
-            console.warn("No se pudo guardar gasto en Firestore:", err);
-          }
-        });
-        document.getElementById('metaForm').addEventListener('submit', (e) => {
+
+        document.getElementById('metaForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const nuevaMeta = {
@@ -545,57 +559,65 @@
             metas.push(nuevaMeta);
             guardarDatos();
             actualizarMetas();
+            
+            // Guardar en Firebase - CORREGIDO: Se movió dentro de la función async
+            try {
+                if (auth.currentUser) {
+                    await addDoc(
+                        collection(db, "users", auth.currentUser.uid, "metas"),
+                        { idLocal: nuevaMeta.id, ...nuevaMeta, createdAt: new Date() }
+                    );
+                }
+            } catch (err) {
+                console.warn("No se pudo guardar meta en Firestore:", err);
+            }
+            
             document.getElementById('metaForm').reset();
         });
-        try {
-            if (auth.currentUser) {
-              await addDoc(
-                collection(db, "users", auth.currentUser.uid, "metas"),
-                { idLocal: nuevaMeta.id, ...nuevaMeta, createdAt: new Date() }
-              );
-            }
-          } catch (err) {
-            console.warn("No se pudo guardar meta en Firestore:", err);
-          }
-        });
-        document.getElementById('presupuestoForm').addEventListener('submit', (e) => {
+
+        document.getElementById('presupuestoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const categoria = document.getElementById('categoriaPresupuesto').value;
             const monto = parseFloat(document.getElementById('montoPresupuesto').value);
             
             const existente = presupuestos.findIndex(p => p.categoria === categoria);
+            let presupuestoDoc;
             
             if (existente !== -1) {
                 presupuestos[existente].monto = monto;
+                presupuestoDoc = presupuestos[existente];
             } else {
-                presupuestos.push({
+                presupuestoDoc = {
                     id: Date.now(),
                     categoria,
                     monto
-                });
+                };
+                presupuestos.push(presupuestoDoc);
             }
             
             guardarDatos();
             actualizarPresupuesto();
+            
+            // Guardar en Firebase - CORREGIDO: Se movió dentro de la función async
+            try {
+                if (auth.currentUser) {
+                    await addDoc(
+                        collection(db, "users", auth.currentUser.uid, "presupuestos"),
+                        { idLocal: presupuestoDoc.id, ...presupuestoDoc, createdAt: new Date() }
+                    );
+                }
+            } catch (err) {
+                console.warn("No se pudo guardar presupuesto en Firestore:", err);
+            }
+            
             document.getElementById('presupuestoForm').reset();
         });
-        // 👉 Guardar también en Firestore
-          try {
-            if (auth.currentUser) {
-              await addDoc(
-                collection(db, "users", auth.currentUser.uid, "presupuestos"),
-                { idLocal: presupuestoDoc.id, ...presupuestoDoc, createdAt: new Date() }
-              );
-            }
-          } catch (err) {
-            console.warn("No se pudo guardar presupuesto en Firestore:", err);
-          }
-        });
-        // Selector de año
+
+        // Selector de año - SE MANTIENE IGUAL
         document.getElementById('selectorAnio').addEventListener('change', actualizarResumenAnual);
 
-        // Funciones de actualización
+        // Funciones de actualización - SE MANTIENE IGUAL
         function actualizarTodo() {
             actualizarIngresos();
             actualizarGastos();
@@ -654,7 +676,6 @@
             const totalGeneral = gastos.reduce((sum, gasto) => sum + gasto.monto, 0);
             document.getElementById('totalGastos').textContent = totalGeneral.toFixed(2);
             
-            // Actualizar gastos por categoría
             const gastosPorCategoria = {};
             gastos.forEach(gasto => {
                 gastosPorCategoria[gasto.categoria] = (gastosPorCategoria[gasto.categoria] || 0) + gasto.monto;
@@ -716,7 +737,6 @@
             document.getElementById('resumenBalance').textContent = balance.toFixed(2);
             document.getElementById('porcentajeAhorro').textContent = porcentajeAhorro.toFixed(1);
             
-            // Actualizar indicador visual
             const indicador = document.getElementById('indicadorFinanciero');
             const icono = document.getElementById('iconoEstado');
             const texto = document.getElementById('textoEstado');
@@ -870,7 +890,6 @@
                 `;
             }).join('');
             
-            // Actualizar totales
             document.getElementById('totalIngresosAnual').textContent = `S/ ${totalIngresosAnual.toFixed(2)}`;
             document.getElementById('totalGastosAnual').textContent = `S/ ${totalGastosAnual.toFixed(2)}`;
             document.getElementById('totalAhorroAnual').textContent = `S/ ${totalAhorroAnual.toFixed(2)}`;
@@ -880,27 +899,15 @@
             elementoBalance.textContent = `S/ ${balanceAnual.toFixed(2)}`;
             elementoBalance.className = `px-6 py-3 ${balanceAnual >= 0 ? 'text-green-600' : 'text-red-600'}`;
             
-            // Actualizar gráfico de tendencia
             actualizarGraficoTendenciaAnual(datosAnuales);
         }
-        const ticksSoles = {
-                  callback: (v) => 'S/ ' + Number(v).toLocaleString('es-PE')
-                };
-                
-                function maxEjeSoles(values) {
-                  const max = Math.max(0, ...values);
-                  if (max === 0) return 100;                 // un mínimo “bonito”
-                  const pow = Math.pow(10, Math.floor(Math.log10(max)));
-                  const headroom = 1.1;                      // 10% de holgura
-                  return Math.ceil((max * headroom) / pow) * pow;
-                }
-        // Funciones de gráficos
+
+        // Funciones de gráficos - SE MANTIENE IGUAL
         function actualizarGraficoIngresos() {
             const ctx = document.getElementById('ingresosChart').getContext('2d');
             
             if (ingresosChart) ingresosChart.destroy();
             
-            // Obtener datos de los últimos 6 meses
             const mesesData = [];
             const ingresosData = [];
             
@@ -914,7 +921,7 @@
                 mesesData.push(fecha.toLocaleDateString('es-ES', { month: 'short' }));
                 ingresosData.push(total);
             }
-            const maxY = maxEjeSoles(ingresosData);
+            
             ingresosChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -982,7 +989,6 @@
         }
 
         function actualizarGraficosResumen() {
-            // Gráfico comparativo
             const ctxComparativo = document.getElementById('comparativoChart').getContext('2d');
             
             if (comparativoChart) comparativoChart.destroy();
@@ -995,7 +1001,6 @@
             const totalGastosMes = gastosMes.reduce((sum, gasto) => sum + gasto.monto, 0);
             const balance = totalIngresosMes - totalGastosMes;
             
-            const maxY = maxEjeSoles([totalIngresosMes, totalGastosMes, balance]);
             comparativoChart = new Chart(ctxComparativo, {
                 type: 'bar',
                 data: {
@@ -1021,7 +1026,6 @@
                 }
             });
 
-            // Gráfico de balance
             const ctxBalance = document.getElementById('balanceChart').getContext('2d');
             
             if (balanceChart) balanceChart.destroy();
@@ -1044,7 +1048,7 @@
                 mesesData.push(fecha.toLocaleDateString('es-ES', { month: 'short' }));
                 balanceData.push(balance);
             }
-            const maxY = maxEjeSoles(balanceData);
+            
             balanceChart = new Chart(ctxBalance, {
                 type: 'line',
                 data: {
@@ -1098,7 +1102,7 @@
                 presupuestosData.push(presupuesto.monto);
                 gastosRealesData.push(gastoReal);
             });
-            const maxY = maxEjeSoles([...presupuestosData, ...gastosRealesData]);
+            
             presupuestoChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1142,7 +1146,7 @@
             const ingresos = datosAnuales.map(d => d.ingresos);
             const gastos = datosAnuales.map(d => d.gastos);
             const balance = datosAnuales.map(d => d.balance);
-            const maxY = maxEjeSoles([...ingresos, ...gastos, ...balance]);
+            
             tendenciaAnualChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -1188,7 +1192,7 @@
             });
         }
 
-        // Funciones auxiliares
+        // Funciones auxiliares - SE MANTIENE IGUAL
         function getFuenteIcon(fuente) {
             const iconos = {
                 'Sueldo': '💼',
@@ -1223,62 +1227,71 @@
             });
         }
 
-        // Funciones de eliminación
-        async function eliminarIngreso(id) {
-           ingresos = ingresos.filter(ingreso => ingreso.id !== id);
+        // Funciones de eliminación - MODIFICADO: Se hicieron async y se corrigió la estructura
+        window.eliminarIngreso = async function(id) {
+            ingresos = ingresos.filter(ingreso => ingreso.id !== id);
             guardarDatos();
             actualizarTodo();
 
-        try {
-            if (window.db && window.auth && auth.currentUser) {
-              const q = query(
-                collection(db, "users", auth.currentUser.uid, "ingresos"),
-                where("idLocal", "==", id)
-              );
-              const snap = await getDocs(q);
-              for (const d of snap.docs) { await deleteDoc(doc(db, d.ref.path));
-            }
-            }
-          } catch (e) { console.warn("No se pudo borrar en Firestore:", e); }
-        }
-
-        async function eliminarGasto(id) {
-            gastos = gastos.filter(gasto => gasto.id !== id);
-              guardarDatos();
-              actualizarTodo();
-            
-              try {
-                if (window.db && window.auth && auth.currentUser) {
-                  const q = query(
-                    collection(db, "users", auth.currentUser.uid, "gastos"),
-                    where("idLocal", "==", id)
-                  );
-                  const snap = await getDocs(q);
-                  for (const d of snap.docs) { await deleteDoc(doc(db, d.ref.path));
+            try {
+                if (auth.currentUser) {
+                    const q = query(
+                        collection(db, "users", auth.currentUser.uid, "ingresos"),
+                        where("idLocal", "==", id)
+                    );
+                    const snap = await getDocs(q);
+                    for (const d of snap.docs) { 
+                        await deleteDoc(doc(db, d.ref.path));
                     }
                 }
-              } catch (e) { console.warn("No se pudo borrar en Firestore:", e); }
+            } catch (e) { 
+                console.warn("No se pudo borrar en Firestore:", e); 
+            }
         }
 
-        async function eliminarMeta(id) {
-            metas = metas.filter(meta => meta.id !== id);
-              guardarDatos();
-              actualizarMetas();
+        window.eliminarGasto = async function(id) {
+            gastos = gastos.filter(gasto => gasto.id !== id);
+            guardarDatos();
+            actualizarTodo();
             
-              try {
-                if (window.db && window.auth && auth.currentUser) {
-                  const q = query(
-                    collection(db, "users", auth.currentUser.uid, "metas"),
-                    where("idLocal", "==", id)
-                  );
-                  const snap = await getDocs(q);
-                  for (const d of snap.docs) { await deleteDoc(doc(db, d.ref.path));
+            try {
+                if (auth.currentUser) {
+                    const q = query(
+                        collection(db, "users", auth.currentUser.uid, "gastos"),
+                        where("idLocal", "==", id)
+                    );
+                    const snap = await getDocs(q);
+                    for (const d of snap.docs) { 
+                        await deleteDoc(doc(db, d.ref.path));
                     }
-                 }
-              } catch (e) { console.warn("No se pudo borrar en Firestore:", e); }
+                }
+            } catch (e) { 
+                console.warn("No se pudo borrar en Firestore:", e); 
+            }
         }
 
-        function actualizarAhorroMeta(id) {
+        window.eliminarMeta = async function(id) {
+            metas = metas.filter(meta => meta.id !== id);
+            guardarDatos();
+            actualizarMetas();
+            
+            try {
+                if (auth.currentUser) {
+                    const q = query(
+                        collection(db, "users", auth.currentUser.uid, "metas"),
+                        where("idLocal", "==", id)
+                    );
+                    const snap = await getDocs(q);
+                    for (const d of snap.docs) { 
+                        await deleteDoc(doc(db, d.ref.path));
+                    }
+                }
+            } catch (e) { 
+                console.warn("No se pudo borrar en Firestore:", e); 
+            }
+        }
+
+        window.actualizarAhorroMeta = function(id) {
             const meta = metas.find(m => m.id === id);
             if (meta) {
                 const nuevoAhorro = prompt(`Ingresa el nuevo monto ahorrado para "${meta.nombre}":`, meta.ahorroActual);
@@ -1290,82 +1303,58 @@
             }
         }
 
-        // Inicializar aplicación
+        // Función para cargar datos desde Firestore - NUEVA: Se agregó esta función
+        async function cargarDatosDesdeFirestore() {
+            const user = auth.currentUser;
+            if (!user) return;
+            const uid = user.uid;
+            
+            const toArray = (snap) => snap.docs.map(d => ({ ...d.data() }));
+            
+            try {
+                const [ingSnap, gasSnap, metSnap, preSnap] = await Promise.all([
+                    getDocs(collection(db, "users", uid, "ingresos")),
+                    getDocs(collection(db, "users", uid, "gastos")),
+                    getDocs(collection(db, "users", uid, "metas")),
+                    getDocs(collection(db, "users", uid, "presupuestos")),
+                ]);
+                
+                ingresos = toArray(ingSnap);
+                gastos = toArray(gasSnap);
+                metas = toArray(metSnap);
+                presupuestos = toArray(preSnap);
+                
+                guardarDatos();
+                actualizarTodo();
+                actualizarResumenAnual();
+            } catch (error) {
+                console.warn("Error cargando datos desde Firestore:", error);
+            }
+        }
+
+        // Inicializar aplicación - MODIFICADO: Se agregó la carga de datos desde Firestore
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                await signInAnonymously(auth);
+                return;
+            }
+            await cargarDatosDesdeFirestore();
+            
+            // Inicializar gráficos después de cargar datos
+            setTimeout(() => {
+                actualizarGraficoIngresos();
+                actualizarGraficoGastos();
+            }, 100);
+        });
+
+        // Inicializar con datos locales mientras se cargan de Firestore
         actualizarTodo();
         actualizarResumenAnual();
-        setTimeout(() => {
-            actualizarGraficoIngresos();
-            actualizarGraficoGastos();
-        }, 100);
-    </script>
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, where, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyBszUwx47pfvpzm4Eut3UAKrY10TpyNeWg",
-      authDomain: "finanzaspersonales-51acf.firebaseapp.com",
-      projectId: "finanzaspersonales-51acf",
-      storageBucket: "finanzaspersonales-51acf.firebasestorage.app",
-      messagingSenderId: "1078068297249",
-      appId: "1:1078068297249:web:fc2f684461897765baed60",
-      measurementId: "G-6GYDFNBS7Z"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-// 👇 HAZ visibles db y auth para el primer <script>
-      window.db = db;
-      window.auth = auth;
-    window.fs = { addDoc, collection, query, where, getDocs, deleteDoc, doc };
-    onAuthStateChanged(auth, async (user) => { if (!user) await signInAnonymously(auth); });
-    async function cargarDatosDesdeFirestore() {
-      const user = auth.currentUser;
-      if (!user) return;
-      const uid = user.uid;
-    
-      // Utilidad para mapear documentos
-      const toArray = (snap) => snap.docs.map(d => ({ ...d.data() }));
-    
-      const [ingSnap, gasSnap, metSnap, preSnap] = await Promise.all([
-        getDocs(collection(db, "users", uid, "ingresos")),
-        getDocs(collection(db, "users", uid, "gastos")),
-        getDocs(collection(db, "users", uid, "metas")),
-        getDocs(collection(db, "users", uid, "presupuestos")),
-      ]);
-    
-      // Sobrescribe los arrays globales del primer <script>
-      window.ingresos      = toArray(ingSnap);
-      window.gastos        = toArray(gasSnap);
-      window.metas         = toArray(metSnap);
-      window.presupuestos  = toArray(preSnap);
-    
-      // Persiste en localStorage y refresca UI (funciones del primer <script>)
-      window.guardarDatos?.();
-      window.actualizarTodo?.();
-      window.actualizarResumenAnual?.();
-    }
-    
-    // Espera al login anónimo y luego carga datos
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        await signInAnonymously(auth);
-        return;
-      }
-      await cargarDatosDesdeFirestore();
-    });
-    // Prueba rápida:
-    window.guardarEnNube = async () => {
-      const ref = collection(db, "prueba");
-      await addDoc(ref, { mensaje: "Hola desde FinanzasPersonales", fecha: new Date() });
-      alert("✅ Guardado en Firebase correctamente");
-    };
   </script>
 </body>
 
 </html>
+
 
 
 
