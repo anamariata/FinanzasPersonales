@@ -912,14 +912,14 @@
                         data: ingresosData,
                         borderColor: '#10B981',
                         backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        borderWidth: 2,
-                        tension: 0.4,
+                        borderWidth: 1,
+                        tension: 0.1,
                         fill: true,
                         pointBackgroundColor: '#10B981',
                         pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
+                        pointBorderWidth: 1,
+                        pointRadius: 2,
+                        pointHoverRadius: 2
                     }]
                 },
                 options: {
@@ -933,9 +933,9 @@
                             mode: 'index',
                             intersect: false,
                             backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            titleFont: { size: 12 },
-                            bodyFont: { size: 12 },
-                            padding: 10
+                            titleFont: { size: 6 },
+                            bodyFont: { size: 6 },
+                            padding: 5
                         }
                     },
                     scales: {
@@ -945,7 +945,8 @@
                                 color: 'rgba(0, 0, 0, 0.1)'
                             },
                             ticks: {
-                                font: { size: 11 },
+                                font: { size: 5 },
+                                maxTicksLimit: 6,
                                 callback: function(value) {
                                     return 'S/ ' + value.toLocaleString('es-PE');
                                 }
@@ -956,7 +957,7 @@
                                 display: false
                             },
                             ticks: {
-                                font: { size: 11 }
+                                font: { size: 6 }
                             }
                         }
                     },
@@ -1000,22 +1001,22 @@
                     datasets: [{
                         data: Object.values(gastosPorCategoria),
                         backgroundColor: coloresRosa,
-                        borderWidth: 2,
+                        borderWidth: 1,
                         borderColor: '#ffffff'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '60%',
+                    cutout: '30%',
                     plugins: {
                         legend: {
                             position: 'bottom',
                             labels: {
-                                padding: 15,
+                                padding: 7,
                                 usePointStyle: true,
                                 pointStyle: 'circle',
-                                font: { size: 11 }
+                                font: { size: 6 }
                             }
                         },
                         tooltip: {
@@ -1098,7 +1099,7 @@
                                 color: 'rgba(0, 0, 0, 0.1)'
                             },
                             ticks: {
-                                font: { size: 11 },
+                                font: { size: 6 },
                                 callback: function(value) {
                                     return 'S/ ' + value.toLocaleString('es-PE');
                                 }
@@ -1109,7 +1110,7 @@
                                 display: false
                             },
                             ticks: {
-                                font: { size: 11 }
+                                font: { size: 6 }
                             }
                         }
                     },
@@ -1157,14 +1158,14 @@
                         data: balanceData,
                         borderColor: '#3B82F6',
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderWidth: 3,
-                        tension: 0.4,
+                        borderWidth: 1,
+                        tension: 0.1,
                         fill: true,
                         pointBackgroundColor: '#3B82F6',
                         pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
+                        pointBorderWidth: 1,
+                        pointRadius: 2,
+                        pointHoverRadius: 3
                     }]
                 },
                 options: {
@@ -1193,7 +1194,7 @@
                                 display: false
                             },
                             ticks: {
-                                font: { size: 11 }
+                                font: { size: 6 }
                             }
                         }
                     },
@@ -1243,7 +1244,7 @@
                             backgroundColor: '#F3E8FF',
                             borderColor: '#C084FC',
                             borderWidth: 1,
-                            borderRadius: 4
+                            borderRadius: 2
                         },
                         {
                             label: 'Gasto Real',
@@ -1251,7 +1252,7 @@
                             backgroundColor: '#F472B6',
                             borderColor: '#DB2777',
                             borderWidth: 1,
-                            borderRadius: 4
+                            borderRadius: 2
                         }
                     ]
                 },
@@ -1262,7 +1263,7 @@
                         legend: {
                             position: 'top',
                             labels: {
-                                font: { size: 11 },
+                                font: { size: 6 },
                                 usePointStyle: true
                             }
                         }
@@ -1274,7 +1275,7 @@
                                 color: 'rgba(0, 0, 0, 0.1)'
                             },
                             ticks: {
-                                font: { size: 11 },
+                                font: { size: 6 },
                                 callback: function(value) {
                                     return 'S/ ' + value.toLocaleString('es-PE');
                                 }
@@ -1285,7 +1286,7 @@
                                 display: false
                             },
                             ticks: {
-                                font: { size: 11 }
+                                font: { size: 6 }
                             }
                         }
                     },
@@ -1320,8 +1321,8 @@
                             data: ingresos,
                             borderColor: '#10B981',
                             backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.4,
+                            borderWidth: 1,
+                            tension: 0.1,
                             fill: false
                         },
                         {
@@ -1329,8 +1330,8 @@
                             data: gastos,
                             borderColor: '#F472B6',
                             backgroundColor: 'rgba(244, 114, 182, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.4,
+                            borderWidth: 1,
+                            tension: 0.1,
                             fill: false
                         },
                         {
@@ -1338,10 +1339,10 @@
                             data: balance,
                             borderColor: '#3B82F6',
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            borderWidth: 3,
-                            tension: 0.4,
+                            borderWidth: 1,
+                            tension: 0.1,
                             fill: false,
-                            borderDash: [5, 5]
+                            borderDash: [2, 2]
                         }
                     ]
                 },
@@ -1352,7 +1353,7 @@
                         legend: {
                             position: 'top',
                             labels: {
-                                font: { size: 11 },
+                                font: { size: 6 },
                                 usePointStyle: true
                             }
                         }
@@ -1364,7 +1365,7 @@
                                 color: 'rgba(0, 0, 0, 0.1)'
                             },
                             ticks: {
-                                font: { size: 11 },
+                                font: { size: 6 },
                                 callback: function(value) {
                                     return 'S/ ' + value.toLocaleString('es-PE');
                                 }
@@ -1375,7 +1376,7 @@
                                 display: false
                             },
                             ticks: {
-                                font: { size: 11 }
+                                font: { size: 6 }
                             }
                         }
                     },
@@ -1566,6 +1567,7 @@
 </body>
 
 </html>
+
 
 
 
