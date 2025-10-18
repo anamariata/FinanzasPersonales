@@ -430,7 +430,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
-// Variables globales - MODIFICADO: Solo arrays vacíos, sin localStorage
+// Variables globales - SE MANTIENE IGUAL
         let ingresos = [];
         let gastos = [];
         let metas = [];
@@ -439,14 +439,15 @@
         // Charts globales - SE MANTIENE IGUAL
         let ingresosChart, gastosChart, comparativoChart, balanceChart, presupuestoChart, tendenciaAnualChart;
 
+        // MODIFICADO: Variable para controlar actualizaciones de gráficos
+        let graficosCargados = false;
+
         // Establecer fechas actuales - SE MANTIENE IGUAL
         document.getElementById('fechaIngreso').valueAsDate = new Date();
         document.getElementById('fechaGasto').valueAsDate = new Date();
         document.getElementById('anioActual').textContent = new Date().getFullYear();
 
-        // ELIMINADO: Función guardarDatos() - Ya no usamos localStorage
-
-        // Navegación por pestañas - SE MANTIENE IGUAL
+        // Navegación por pestañas - MODIFICADO: Optimizado para no recargar gráficos innecesariamente
         document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', () => {
                 const tabId = button.dataset.tab;
@@ -462,22 +463,25 @@
                 document.getElementById(tabId).classList.add('active');
                 button.classList.add('active');
                 
-                setTimeout(() => {
-                    if (tabId === 'ingresos') actualizarGraficoIngresos();
-                    if (tabId === 'gastos') actualizarGraficoGastos();
-                    if (tabId === 'resumen') actualizarGraficosResumen();
-                    if (tabId === 'presupuesto') actualizarGraficoPresupuesto();
-                    if (tabId === 'anual') actualizarResumenAnual();
-                }, 100);
+                // MODIFICADO: Solo actualizar gráficos si ya están cargados inicialmente
+                if (graficosCargados) {
+                    setTimeout(() => {
+                        if (tabId === 'ingresos' && document.getElementById('ingresosChart')) actualizarGraficoIngresos();
+                        if (tabId === 'gastos' && document.getElementById('gastosChart')) actualizarGraficoGastos();
+                        if (tabId === 'resumen') actualizarGraficosResumen();
+                        if (tabId === 'presupuesto' && document.getElementById('presupuestoChart')) actualizarGraficoPresupuesto();
+                        if (tabId === 'anual') actualizarResumenAnual();
+                    }, 100);
+                }
             });
         });
 
-        // Formularios - MODIFICADO: Solo guarda en Firebase, no en localStorage
+        // Formularios - SE MANTIENE IGUAL (solo Firebase)
         document.getElementById('ingresoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const nuevoIngreso = {
-                id: Date.now(), // ID temporal local
+                id: Date.now(),
                 fecha: document.getElementById('fechaIngreso').value,
                 fuente: document.getElementById('fuenteIngreso').value,
                 monto: parseFloat(document.getElementById('montoIngreso').value),
@@ -487,14 +491,12 @@
                 createdAt: new Date()
             };
             
-            // SOLO Firebase - ELIMINADO: guardarDatos() y push a array local
             try {
                 if (auth.currentUser) {
                     await addDoc(
                         collection(db, "users", auth.currentUser.uid, "ingresos"),
                         nuevoIngreso
                     );
-                    // La actualización de la UI se hará automáticamente con onSnapshot
                 }
             } catch (err) {
                 console.warn("No se pudo guardar ingreso en Firestore:", err);
@@ -509,7 +511,7 @@
             e.preventDefault();
             
             const nuevoGasto = {
-                id: Date.now(), // ID temporal local
+                id: Date.now(),
                 fecha: document.getElementById('fechaGasto').value,
                 categoria: document.getElementById('categoriaGasto').value,
                 descripcion: document.getElementById('descripcionGasto').value,
@@ -519,14 +521,12 @@
                 createdAt: new Date()
             };
             
-            // SOLO Firebase - ELIMINADO: guardarDatos() y push a array local
             try {
                 if (auth.currentUser) {
                     await addDoc(
                         collection(db, "users", auth.currentUser.uid, "gastos"),
                         nuevoGasto
                     );
-                    // La actualización de la UI se hará automáticamente con onSnapshot
                 }
             } catch (err) {
                 console.warn("No se pudo guardar gasto en Firestore:", err);
@@ -541,7 +541,7 @@
             e.preventDefault();
             
             const nuevaMeta = {
-                id: Date.now(), // ID temporal local
+                id: Date.now(),
                 nombre: document.getElementById('nombreMeta').value,
                 montoObjetivo: parseFloat(document.getElementById('montoObjetivo').value),
                 ahorroActual: parseFloat(document.getElementById('ahorroActual').value) || 0,
@@ -549,14 +549,12 @@
                 createdAt: new Date()
             };
             
-            // SOLO Firebase - ELIMINADO: guardarDatos() y push a array local
             try {
                 if (auth.currentUser) {
                     await addDoc(
                         collection(db, "users", auth.currentUser.uid, "metas"),
                         nuevaMeta
                     );
-                    // La actualización de la UI se hará automáticamente con onSnapshot
                 }
             } catch (err) {
                 console.warn("No se pudo guardar meta en Firestore:", err);
@@ -570,20 +568,18 @@
             e.preventDefault();
             
             const presupuestoDoc = {
-                id: Date.now(), // ID temporal local
+                id: Date.now(),
                 categoria: document.getElementById('categoriaPresupuesto').value,
                 monto: parseFloat(document.getElementById('montoPresupuesto').value),
                 createdAt: new Date()
             };
             
-            // SOLO Firebase - ELIMINADO: guardarDatos() y lógica de actualización local
             try {
                 if (auth.currentUser) {
                     await addDoc(
                         collection(db, "users", auth.currentUser.uid, "presupuestos"),
                         presupuestoDoc
                     );
-                    // La actualización de la UI se hará automáticamente con onSnapshot
                 }
             } catch (err) {
                 console.warn("No se pudo guardar presupuesto en Firestore:", err);
@@ -881,12 +877,17 @@
             actualizarGraficoTendenciaAnual(datosAnuales);
         }
 
-        // Funciones de gráficos - SE MANTIENE IGUAL
+        // MODIFICADO: Funciones de gráficos optimizadas para mejor rendimiento
         function actualizarGraficoIngresos() {
-            const ctx = document.getElementById('ingresosChart').getContext('2d');
+            const ctx = document.getElementById('ingresosChart');
+            if (!ctx) return;
             
-            if (ingresosChart) ingresosChart.destroy();
+            // Destruir gráfico existente si hay uno
+            if (ingresosChart) {
+                ingresosChart.destroy();
+            }
             
+            // Obtener datos de los últimos 6 meses
             const mesesData = [];
             const ingresosData = [];
             
@@ -901,6 +902,7 @@
                 ingresosData.push(total);
             }
             
+            // MODIFICADO: Configuración optimizada del gráfico
             ingresosChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -910,8 +912,14 @@
                         data: ingresosData,
                         borderColor: '#10B981',
                         backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 2,
                         tension: 0.4,
-                        fill: true
+                        fill: true,
+                        pointBackgroundColor: '#10B981',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
                     }]
                 },
                 options: {
@@ -920,57 +928,128 @@
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleFont: { size: 12 },
+                            bodyFont: { size: 12 },
+                            padding: 10
                         }
                     },
                     scales: {
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                font: { size: 11 },
+                                callback: function(value) {
+                                    return 'S/ ' + value.toLocaleString('es-PE');
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { size: 11 }
+                            }
                         }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
                     }
                 }
             });
         }
 
         function actualizarGraficoGastos() {
-            const ctx = document.getElementById('gastosChart').getContext('2d');
+            const ctx = document.getElementById('gastosChart');
+            if (!ctx) return;
             
-            if (gastosChart) gastosChart.destroy();
+            if (gastosChart) {
+                gastosChart.destroy();
+            }
             
             const gastosPorCategoria = {};
             gastos.forEach(gasto => {
                 gastosPorCategoria[gasto.categoria] = (gastosPorCategoria[gasto.categoria] || 0) + gasto.monto;
             });
 
+            // MODIFICADO: Colores optimizados
             const coloresRosa = [
                 '#F472B6', '#EC4899', '#DB2777', '#BE185D',
-                '#F9A8D4', '#F3E8FF', '#E879F9', '#C084FC'
+                '#F9A8D4', '#FBCFE8', '#FDA4AF', '#FB7185'
             ];
 
+            // MODIFICADO: Configuración optimizada del gráfico de doughnut
             gastosChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(gastosPorCategoria),
                     datasets: [{
                         data: Object.values(gastosPorCategoria),
-                        backgroundColor: coloresRosa
+                        backgroundColor: coloresRosa,
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    cutout: '60%',
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: { size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: S/ ${value.toFixed(2)} (${percentage}%)`;
+                                }
+                            }
                         }
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
                     }
                 }
             });
         }
 
         function actualizarGraficosResumen() {
-            const ctxComparativo = document.getElementById('comparativoChart').getContext('2d');
+            actualizarGraficoComparativo();
+            actualizarGraficoBalance();
+        }
+
+        function actualizarGraficoComparativo() {
+            const ctx = document.getElementById('comparativoChart');
+            if (!ctx) return;
             
-            if (comparativoChart) comparativoChart.destroy();
+            if (comparativoChart) {
+                comparativoChart.destroy();
+            }
             
             const mesActual = obtenerMesActual();
             const ingresosMes = filtrarPorMes(ingresos, mesActual);
@@ -980,13 +1059,21 @@
             const totalGastosMes = gastosMes.reduce((sum, gasto) => sum + gasto.monto, 0);
             const balance = totalIngresosMes - totalGastosMes;
             
-            comparativoChart = new Chart(ctxComparativo, {
+            // MODIFICADO: Configuración optimizada del gráfico de barras
+            comparativoChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: ['Ingresos', 'Gastos', 'Balance'],
                     datasets: [{
                         data: [totalIngresosMes, totalGastosMes, balance],
-                        backgroundColor: ['#10B981', '#F472B6', balance >= 0 ? '#3B82F6' : '#EF4444']
+                        backgroundColor: [
+                            '#10B981', 
+                            '#F472B6', 
+                            balance >= 0 ? '#3B82F6' : '#EF4444'
+                        ],
+                        borderWidth: 0,
+                        borderRadius: 8,
+                        borderSkipped: false,
                     }]
                 },
                 options: {
@@ -995,19 +1082,51 @@
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `S/ ${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
                         }
                     },
                     scales: {
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                font: { size: 11 },
+                                callback: function(value) {
+                                    return 'S/ ' + value.toLocaleString('es-PE');
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { size: 11 }
+                            }
                         }
+                    },
+                    animation: {
+                        duration: 1000
                     }
                 }
             });
+        }
 
-            const ctxBalance = document.getElementById('balanceChart').getContext('2d');
+        function actualizarGraficoBalance() {
+            const ctx = document.getElementById('balanceChart');
+            if (!ctx) return;
             
-            if (balanceChart) balanceChart.destroy();
+            if (balanceChart) {
+                balanceChart.destroy();
+            }
             
             const mesesData = [];
             const balanceData = [];
@@ -1028,7 +1147,8 @@
                 balanceData.push(balance);
             }
             
-            balanceChart = new Chart(ctxBalance, {
+            // MODIFICADO: Configuración optimizada del gráfico de línea
+            balanceChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: mesesData,
@@ -1037,8 +1157,14 @@
                         data: balanceData,
                         borderColor: '#3B82F6',
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
                         tension: 0.4,
-                        fill: true
+                        fill: true,
+                        pointBackgroundColor: '#3B82F6',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
                     }]
                 },
                 options: {
@@ -1051,17 +1177,40 @@
                     },
                     scales: {
                         y: {
-                            beginAtZero: false
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                font: { size: 11 },
+                                callback: function(value) {
+                                    return 'S/ ' + value.toLocaleString('es-PE');
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { size: 11 }
+                            }
                         }
+                    },
+                    animation: {
+                        duration: 1000
                     }
                 }
             });
         }
         
         function actualizarGraficoPresupuesto() {
-            const ctx = document.getElementById('presupuestoChart').getContext('2d');
+            const ctx = document.getElementById('presupuestoChart');
+            if (!ctx) return;
             
-            if (presupuestoChart) presupuestoChart.destroy();
+            if (presupuestoChart) {
+                presupuestoChart.destroy();
+            }
             
             if (presupuestos.length === 0) return;
             
@@ -1082,6 +1231,7 @@
                 gastosRealesData.push(gastoReal);
             });
             
+            // MODIFICADO: Configuración optimizada del gráfico de barras agrupadas
             presupuestoChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -1090,12 +1240,18 @@
                         {
                             label: 'Presupuesto Planeado',
                             data: presupuestosData,
-                            backgroundColor: '#F3E8FF'
+                            backgroundColor: '#F3E8FF',
+                            borderColor: '#C084FC',
+                            borderWidth: 1,
+                            borderRadius: 4
                         },
                         {
                             label: 'Gasto Real',
                             data: gastosRealesData,
-                            backgroundColor: '#F472B6'
+                            backgroundColor: '#F472B6',
+                            borderColor: '#DB2777',
+                            borderWidth: 1,
+                            borderRadius: 4
                         }
                     ]
                 },
@@ -1104,28 +1260,56 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'top'
+                            position: 'top',
+                            labels: {
+                                font: { size: 11 },
+                                usePointStyle: true
+                            }
                         }
                     },
                     scales: {
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                font: { size: 11 },
+                                callback: function(value) {
+                                    return 'S/ ' + value.toLocaleString('es-PE');
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { size: 11 }
+                            }
                         }
+                    },
+                    animation: {
+                        duration: 1000
                     }
                 }
             });
         }
 
         function actualizarGraficoTendenciaAnual(datosAnuales) {
-            const ctx = document.getElementById('tendenciaAnualChart').getContext('2d');
+            const ctx = document.getElementById('tendenciaAnualChart');
+            if (!ctx) return;
             
-            if (tendenciaAnualChart) tendenciaAnualChart.destroy();
+            if (tendenciaAnualChart) {
+                tendenciaAnualChart.destroy();
+            }
             
             const meses = datosAnuales.map(d => d.mes);
             const ingresos = datosAnuales.map(d => d.ingresos);
             const gastos = datosAnuales.map(d => d.gastos);
             const balance = datosAnuales.map(d => d.balance);
             
+            // MODIFICADO: Configuración optimizada del gráfico de tendencia
             tendenciaAnualChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -1136,21 +1320,28 @@
                             data: ingresos,
                             borderColor: '#10B981',
                             backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                            tension: 0.4
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: false
                         },
                         {
                             label: 'Gastos (S/)',
                             data: gastos,
                             borderColor: '#F472B6',
                             backgroundColor: 'rgba(244, 114, 182, 0.1)',
-                            tension: 0.4
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: false
                         },
                         {
                             label: 'Balance (S/)',
                             data: balance,
                             borderColor: '#3B82F6',
                             backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            tension: 0.4
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: false,
+                            borderDash: [5, 5]
                         }
                     ]
                 },
@@ -1159,13 +1350,37 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'top'
+                            position: 'top',
+                            labels: {
+                                font: { size: 11 },
+                                usePointStyle: true
+                            }
                         }
                     },
                     scales: {
                         y: {
-                            beginAtZero: false
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            ticks: {
+                                font: { size: 11 },
+                                callback: function(value) {
+                                    return 'S/ ' + value.toLocaleString('es-PE');
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { size: 11 }
+                            }
                         }
+                    },
+                    animation: {
+                        duration: 1000
                     }
                 }
             });
@@ -1206,7 +1421,7 @@
             });
         }
 
-        // Funciones de eliminación - MODIFICADO: Solo elimina de Firebase
+        // Funciones de eliminación - SE MANTIENE IGUAL
         window.eliminarIngreso = async function(id) {
             try {
                 if (auth.currentUser) {
@@ -1218,7 +1433,6 @@
                     for (const d of snap.docs) { 
                         await deleteDoc(doc(db, d.ref.path));
                     }
-                    // La actualización de la UI se hará automáticamente con onSnapshot
                 }
             } catch (e) { 
                 console.warn("No se pudo borrar en Firestore:", e); 
@@ -1237,7 +1451,6 @@
                     for (const d of snap.docs) { 
                         await deleteDoc(doc(db, d.ref.path));
                     }
-                    // La actualización de la UI se hará automáticamente con onSnapshot
                 }
             } catch (e) { 
                 console.warn("No se pudo borrar en Firestore:", e); 
@@ -1256,7 +1469,6 @@
                     for (const d of snap.docs) { 
                         await deleteDoc(doc(db, d.ref.path));
                     }
-                    // La actualización de la UI se hará automáticamente con onSnapshot
                 }
             } catch (e) { 
                 console.warn("No se pudo borrar en Firestore:", e); 
@@ -1278,7 +1490,6 @@
                             const snap = await getDocs(q);
                             for (const d of snap.docs) { 
                                 await deleteDoc(doc(db, d.ref.path));
-                                // Crear nuevo documento con el ahorro actualizado
                                 await addDoc(
                                     collection(db, "users", auth.currentUser.uid, "metas"),
                                     { ...meta, ahorroActual: parseFloat(nuevoAhorro) }
@@ -1293,14 +1504,17 @@
             }
         }
 
-        // NUEVO: Configurar listeners en tiempo real con onSnapshot
+        // MODIFICADO: Configurar listeners optimizados
         function configurarListenersTiempoReal(uid) {
             // Listener para ingresos
             onSnapshot(collection(db, "users", uid, "ingresos"), (snapshot) => {
                 ingresos = snapshot.docs.map(doc => ({ ...doc.data(), firebaseId: doc.id }));
                 actualizarIngresos();
                 actualizarResumen();
-                actualizarGraficoIngresos();
+                // MODIFICADO: Solo actualizar gráficos si están visibles
+                if (document.getElementById('ingresos').classList.contains('active')) {
+                    actualizarGraficoIngresos();
+                }
             });
 
             // Listener para gastos
@@ -1308,7 +1522,10 @@
                 gastos = snapshot.docs.map(doc => ({ ...doc.data(), firebaseId: doc.id }));
                 actualizarGastos();
                 actualizarResumen();
-                actualizarGraficoGastos();
+                // MODIFICADO: Solo actualizar gráficos si están visibles
+                if (document.getElementById('gastos').classList.contains('active')) {
+                    actualizarGraficoGastos();
+                }
             });
 
             // Listener para metas
@@ -1321,31 +1538,35 @@
             onSnapshot(collection(db, "users", uid, "presupuestos"), (snapshot) => {
                 presupuestos = snapshot.docs.map(doc => ({ ...doc.data(), firebaseId: doc.id }));
                 actualizarPresupuesto();
-                actualizarGraficoPresupuesto();
+                // MODIFICADO: Solo actualizar gráficos si están visibles
+                if (document.getElementById('presupuesto').classList.contains('active')) {
+                    actualizarGraficoPresupuesto();
+                }
             });
         }
 
-        // Inicializar aplicación - MODIFICADO: Solo Firebase
+        // MODIFICADO: Inicialización optimizada
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 await signInAnonymously(auth);
                 return;
             }
             
-            // Configurar listeners en tiempo real
             configurarListenersTiempoReal(user.uid);
             
-            // Inicializar gráficos después de cargar datos
+            // MODIFICADO: Carga inicial de gráficos con delay
             setTimeout(() => {
                 actualizarGraficoIngresos();
                 actualizarGraficoGastos();
                 actualizarResumenAnual();
-            }, 500);
+                graficosCargados = true;
+            }, 1000);
         });
   </script>
 </body>
 
 </html>
+
 
 
 
