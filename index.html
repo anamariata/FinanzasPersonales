@@ -271,14 +271,17 @@
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-xl font-semibold text-gray-800 mb-4">📈 Comparación Mensual</h3>
-                        <canvas id="comparativoChart" height="300"></canvas>
+                        <div class="chart-container-lg">
+                            <canvas id="comparativoChart"></canvas>
+                        </div>
                     </div>
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-xl font-semibold text-gray-800 mb-4">📊 Evolución del Balance</h3>
-                        <canvas id="balanceChart" height="300"></canvas>
+                        <div class="chart-container-lg">
+                            <canvas id="balanceChart"></canvas>
+                        </div>
                     </div>
                 </div>
-            </div>
 
             <!-- SECCIÓN METAS -->
             <div id="metas" class="tab-content">
@@ -354,7 +357,9 @@
                 <!-- Gráfico comparativo -->
                 <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">🌸 Gráfico Comparativo</h3>
-                    <canvas id="presupuestoChart" height="100"></canvas>
+                    <div class="chart-container-lg">
+                        <canvas id="presupuestoChart"></canvas>
+                    </div>
                 </div>
 
                 <!-- Tabla comparativa -->
@@ -427,7 +432,9 @@
                 <!-- Gráfico de tendencia anual -->
                 <div class="bg-white rounded-xl shadow-lg p-6">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">📈 Tendencia Anual</h3>
-                    <canvas id="tendenciaAnualChart" height="400"></canvas>
+                    <div class="chart-container-xl">
+                        <canvas id="tendenciaAnualChart"></canvas>
+                    </div>
                 </div>
             </div>
         </main>
@@ -1616,6 +1623,7 @@
 </body>
 
 </html>
+
 
 
 
