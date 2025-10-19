@@ -27,6 +27,23 @@
         .tab-button:hover {
             background: #fce7f3;
         }
+        /* AGREGAR ESTAS NUEVAS CLASES PARA CONTROLAR GRÁFICOS */
+        .chart-container {
+            height: 250px;
+            position: relative;
+        }
+        .chart-container-sm {
+            height: 200px;
+            position: relative;
+        }
+        .chart-container-lg {
+            height: 300px;
+            position: relative;
+        }
+        .chart-container-xl {
+            height: 350px;
+            position: relative;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-pink-50 to-rose-100 min-h-screen">
@@ -115,7 +132,9 @@
                     </div>
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-xl font-semibold text-gray-800 mb-4">📈 Evolución de Ingresos</h3>
-                        <canvas id="ingresosChart" height="200"></canvas>
+                        <div class="chart-container">
+                            <canvas id="ingresosChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -191,7 +210,7 @@
                 </div>
 
                 <!-- Resumen y gráfico de gastos -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-xl font-semibold text-gray-800 mb-4">📊 Gastos por Categoría</h3>
                         <div id="gastosPorCategoria" class="space-y-2">
@@ -200,10 +219,11 @@
                     </div>
                     <div class="bg-white rounded-xl shadow-lg p-6">
                         <h3 class="text-xl font-semibold text-gray-800 mb-4">🌸 Distribución de Gastos</h3>
-                        <canvas id="gastosChart" height="200"></canvas>
+                        <div class="chart-container">
+                            <canvas id="gastosChart"></canvas>
+                        </div>
                     </div>
                 </div>
-
                 <!-- Lista de gastos -->
                 <div class="bg-white rounded-xl shadow-lg p-6">
                     <div class="flex justify-between items-center mb-4">
@@ -334,7 +354,7 @@
                 <!-- Gráfico comparativo -->
                 <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">🌸 Gráfico Comparativo</h3>
-                    <canvas id="presupuestoChart" height="300"></canvas>
+                    <canvas id="presupuestoChart" height="100"></canvas>
                 </div>
 
                 <!-- Tabla comparativa -->
@@ -935,6 +955,14 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                            layout: {
+                        padding: {
+                            top: 5,
+                            bottom: 5,
+                            left: 5,
+                            right: 5
+                        }
+                    },
                     plugins: {
                         legend: {
                             display: false
@@ -957,6 +985,7 @@
                             ticks: {
                                 font: { size: 5 },
                                 maxTicksLimit: 6,
+                                padding: 5,
                                 callback: function(value) {
                                     return 'S/ ' + value.toLocaleString('es-PE');
                                 }
@@ -967,7 +996,8 @@
                                 display: false
                             },
                             ticks: {
-                                font: { size: 6 }
+                                font: { size: 6 },
+                                padding: 5
                             }
                         }
                     },
@@ -1019,6 +1049,14 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     cutout: '30%',
+                    layout: {
+                        padding: {
+                            top: 10,
+                            bottom: 10,
+                            left: 10,
+                            right: 10
+                        }
+                    },
                     plugins: {
                         legend: {
                             position: 'bottom',
@@ -1026,7 +1064,8 @@
                                 padding: 7,
                                 usePointStyle: true,
                                 pointStyle: 'circle',
-                                font: { size: 6 }
+                                font: { size: 6 },
+                                boxWidth: 10
                             }
                         },
                         tooltip: {
@@ -1577,6 +1616,7 @@
 </body>
 
 </html>
+
 
 
 
