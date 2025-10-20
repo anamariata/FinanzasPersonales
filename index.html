@@ -1480,28 +1480,61 @@
         }
 
         // Funciones de eliminación - SE MANTIENE IGUAL
-        window.eliminarIngreso = async function(firebaseId) {
+        window.eliminarIngreso = async function(id) {
             if (!confirm('¿Estás seguro de eliminar este ingreso?')) return;
             
             try {
                 if (auth.currentUser) {
-                    console.log("Eliminando ingreso con ID:", firebaseId);
-                    await deleteDoc(doc(db, "users", auth.currentUser.uid, "ingresos", firebaseId));
-                    console.log("Ingreso eliminado exitosamente");
+                    console.log("Buscando ingreso con ID:", id);
+                    
+                    // Buscar el documento por el ID personalizado
+                    const q = query(
+                        collection(db, "users", auth.currentUser.uid, "ingresos"),
+                        where("id", "==", parseInt(id))
+                    );
+                    const querySnapshot = await getDocs(q);
+                    
+                    if (!querySnapshot.empty) {
+                        // Eliminar cada documento encontrado
+                        const deletePromises = querySnapshot.docs.map(document => 
+                            deleteDoc(doc(db, "users", auth.currentUser.uid, "ingresos", document.id))
+                        );
+                        await Promise.all(deletePromises);
+                        console.log("Ingreso eliminado exitosamente");
+                    } else {
+                        console.log("No se encontró el ingreso para eliminar");
+                        alert("No se pudo encontrar el ingreso para eliminar.");
+                    }
                 }
             } catch (e) { 
                 console.error("Error al eliminar ingreso:", e); 
                 alert("Error al eliminar el ingreso. Intenta nuevamente.");
             }
         }
-        window.eliminarGasto = async function(firebaseId) {
-                    if (!confirm('¿Estás seguro de eliminar este gasto?')) return;
+
+        window.eliminarGasto = async function(id) {
+            if (!confirm('¿Estás seguro de eliminar este gasto?')) return;
             
             try {
                 if (auth.currentUser) {
-                    console.log("Eliminando gasto con ID:", firebaseId);
-                    await deleteDoc(doc(db, "users", auth.currentUser.uid, "gastos", firebaseId));
-                    console.log("Gasto eliminado exitosamente");
+                    console.log("Buscando gasto con ID:", id);
+                    
+                    const q = query(
+                        collection(db, "users", auth.currentUser.uid, "gastos"),
+                        where("id", "==", parseInt(id))
+                    );
+                    const querySnapshot = await getDocs(q);
+                    
+                    if (!querySnapshot.empty) {
+                        const deletePromises = querySnapshot.docs.map(document => 
+                            deleteDoc(doc(db, "users", auth.currentUser.uid, "gastos", document.id))
+                        );
+                        await Promise.all(deletePromises);
+                        console.log("Gasto eliminado exitosamente");
+                    } else {
+                        console.log("No se encontró el gasto para eliminar");
+                        alert("No se pudo encontrar el gasto para eliminar.");
+                    }
                 }
             } catch (e) { 
                 console.error("Error al eliminar gasto:", e); 
@@ -1509,30 +1542,64 @@
             }
         }
 
-        window.eliminarMeta = async function(firebaseId) {
-                     if (!confirm('¿Estás seguro de eliminar esta meta?')) return;
+
+        window.eliminarMeta = async function(id) {
+            if (!confirm('¿Estás seguro de eliminar esta meta?')) return;
             
             try {
                 if (auth.currentUser) {
-                    console.log("Eliminando meta con ID:", firebaseId);
-                    await deleteDoc(doc(db, "users", auth.currentUser.uid, "metas", firebaseId));
-                    console.log("Meta eliminada exitosamente");
+                    console.log("Buscando meta con ID:", id);
+                    
+                    const q = query(
+                        collection(db, "users", auth.currentUser.uid, "metas"),
+                        where("id", "==", parseInt(id))
+                    );
+                    const querySnapshot = await getDocs(q);
+                    
+                    if (!querySnapshot.empty) {
+                        const deletePromises = querySnapshot.docs.map(document => 
+                            deleteDoc(doc(db, "users", auth.currentUser.uid, "metas", document.id))
+                        );
+                        await Promise.all(deletePromises);
+                        console.log("Meta eliminada exitosamente");
+                    } else {
+                        console.log("No se encontró la meta para eliminar");
+                        alert("No se pudo encontrar la meta para eliminar.");
+                    }
                 }
             } catch (e) { 
                 console.error("Error al eliminar meta:", e); 
                 alert("Error al eliminar la meta. Intenta nuevamente.");
             }
         }
-       window.actualizarAhorroMeta = async function(firebaseId) {
-                     const meta = metas.find(m => m.firebaseId === firebaseId);
+
+        window.actualizarAhorroMeta = async function(id) {
+            const meta = metas.find(m => m.id === parseInt(id));
             if (meta) {
                 const nuevoAhorro = prompt(`Ingresa el nuevo monto ahorrado para "${meta.nombre}":`, meta.ahorroActual);
                 if (nuevoAhorro !== null && !isNaN(nuevoAhorro)) {
                     try {
                         if (auth.currentUser) {
-                            await updateDoc(doc(db, "users", auth.currentUser.uid, "metas", firebaseId), {
-                                ahorroActual: parseFloat(nuevoAhorro)
-                            });
+                            // Buscar la meta por ID personalizado
+                            const q = query(
+                                collection(db, "users", auth.currentUser.uid, "metas"),
+                                where("id", "==", parseInt(id))
+                            );
+                            const querySnapshot = await getDocs(q);
+                            
+                            if (!querySnapshot.empty) {
+                                // Actualizar cada documento encontrado
+                                const updatePromises = querySnapshot.docs.map(document => 
+                                    updateDoc(doc(db, "users", auth.currentUser.uid, "metas", document.id), {
+                                        ahorroActual: parseFloat(nuevoAhorro)
+                                    })
+                                );
+                                await Promise.all(updatePromises);
+                                console.log("Meta actualizada exitosamente");
+                            } else {
+                                console.log("No se encontró la meta para actualizar");
+                                alert("No se pudo encontrar la meta para actualizar.");
+                            }
                         }
                     } catch (e) {
                         console.warn("No se pudo actualizar en Firestore:", e);
@@ -1603,6 +1670,7 @@
 </body>
 
 </html>
+
 
 
 
