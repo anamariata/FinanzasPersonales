@@ -482,7 +482,6 @@
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
     import { 
         getAuth, 
-        signInAnonymously, 
         onAuthStateChanged,
         createUserWithEmailAndPassword,
         signInWithEmailAndPassword,
@@ -1779,27 +1778,50 @@
             });
         }
 
-        // MODIFICADO: Inicialización optimizada
+        // INICIALIZACIÓN CORREGIDA - Sin autenticación anónima
         onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                await signInAnonymously(auth);
-                return;
+            if (user) {
+                // Usuario autenticado (con email/contraseña)
+                console.log("Usuario autenticado:", user.email);
+                loginSection.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                
+                // Configurar listeners en tiempo real
+                configurarListenersTiempoReal(user.uid);
+                
+                // Cargar gráficos después de un delay
+                setTimeout(() => {
+                    actualizarGraficoIngresos();
+                    actualizarGraficoGastos();
+                    actualizarResumenAnual();
+                    graficosCargados = true;
+                }, 1000);
+                
+            } else {
+                // No hay usuario autenticado - MOSTRAR LOGIN
+                console.log("No hay usuario autenticado");
+                loginSection.classList.remove('hidden');
+                mainApp.classList.add('hidden');
+                
+                // Limpiar datos locales cuando no hay usuario
+                ingresos = [];
+                gastos = [];
+                metas = [];
+                presupuestos = [];
+                
+                // Actualizar la UI para mostrar estado vacío
+                actualizarIngresos();
+                actualizarGastos();
+                actualizarMetas();
+                actualizarPresupuesto();
+                actualizarResumen();
             }
-            
-            configurarListenersTiempoReal(user.uid);
-            
-            // MODIFICADO: Carga inicial de gráficos con delay
-            setTimeout(() => {
-                actualizarGraficoIngresos();
-                actualizarGraficoGastos();
-                actualizarResumenAnual();
-                graficosCargados = true;
-            }, 1000);
         });
   </script>
 </body>
 
 </html>
+
 
 
 
