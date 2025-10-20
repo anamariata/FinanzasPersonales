@@ -658,6 +658,7 @@
             
             if (resultado.exito) {
                 alert(resultado.mensaje);
+                document.getElementById('registroForm').reset();
                 // El usuario queda automáticamente logueado después del registro
             } else {
                 alert(resultado.mensaje);
@@ -706,7 +707,9 @@
                 console.log("Mostrando aplicación para:", user.email);
                 loginSection.classList.add('hidden');
                 mainApp.classList.remove('hidden');
-                
+
+                //ESTA LÍNEA PARA OCULTAR EL FORMULARIO DE REGISTRO
+                document.getElementById('registroSection').classList.add('hidden');
                 // Configurar listeners en tiempo real
                 configurarListenersTiempoReal(user.uid);
                 
@@ -723,6 +726,8 @@
                 console.log("Mostrando formulario de login");
                 loginSection.classList.remove('hidden');
                 mainApp.classList.add('hidden');
+                // AGREGAR ESTA LÍNEA PARA ASEGURAR QUE EL REGISTRO TAMBIÉN ESTÉ OCULTO
+                document.getElementById('registroSection').classList.add('hidden');
                 
                 // Forzar limpieza completa
                 ingresos = [];
@@ -1991,5 +1996,6 @@
   </script>
 </body>
 </html>
+
 
 
