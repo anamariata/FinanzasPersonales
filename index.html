@@ -1485,42 +1485,46 @@
             
             try {
                 if (auth.currentUser) {
+                    console.log("Eliminando ingreso con ID:", firebaseId);
                     await deleteDoc(doc(db, "users", auth.currentUser.uid, "ingresos", firebaseId));
+                    console.log("Ingreso eliminado exitosamente");
                 }
             } catch (e) { 
-                console.warn("No se pudo borrar en Firestore:", e); 
+                console.error("Error al eliminar ingreso:", e); 
                 alert("Error al eliminar el ingreso. Intenta nuevamente.");
             }
         }
-
         window.eliminarGasto = async function(firebaseId) {
-            if (!confirm('¿Estás seguro de eliminar este gasto?')) return;
+                    if (!confirm('¿Estás seguro de eliminar este gasto?')) return;
             
             try {
                 if (auth.currentUser) {
+                    console.log("Eliminando gasto con ID:", firebaseId);
                     await deleteDoc(doc(db, "users", auth.currentUser.uid, "gastos", firebaseId));
+                    console.log("Gasto eliminado exitosamente");
                 }
             } catch (e) { 
-                console.warn("No se pudo borrar en Firestore:", e); 
+                console.error("Error al eliminar gasto:", e); 
                 alert("Error al eliminar el gasto. Intenta nuevamente.");
             }
         }
 
         window.eliminarMeta = async function(firebaseId) {
-            if (!confirm('¿Estás seguro de eliminar esta meta?')) return;
+                     if (!confirm('¿Estás seguro de eliminar esta meta?')) return;
             
             try {
                 if (auth.currentUser) {
+                    console.log("Eliminando meta con ID:", firebaseId);
                     await deleteDoc(doc(db, "users", auth.currentUser.uid, "metas", firebaseId));
+                    console.log("Meta eliminada exitosamente");
                 }
             } catch (e) { 
-                console.warn("No se pudo borrar en Firestore:", e); 
+                console.error("Error al eliminar meta:", e); 
                 alert("Error al eliminar la meta. Intenta nuevamente.");
             }
         }
-
        window.actualizarAhorroMeta = async function(firebaseId) {
-            const meta = metas.find(m => m.firebaseId === firebaseId);
+                     const meta = metas.find(m => m.firebaseId === firebaseId);
             if (meta) {
                 const nuevoAhorro = prompt(`Ingresa el nuevo monto ahorrado para "${meta.nombre}":`, meta.ahorroActual);
                 if (nuevoAhorro !== null && !isNaN(nuevoAhorro)) {
@@ -1536,8 +1540,7 @@
                     }
                 }
             }
-         }
-
+        }
         // MODIFICADO: Configurar listeners optimizados
         function configurarListenersTiempoReal(uid) {
             // Listener para ingresos
@@ -1600,6 +1603,7 @@
 </body>
 
 </html>
+
 
 
 
