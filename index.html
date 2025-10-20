@@ -450,7 +450,8 @@
         where, 
         getDocs, 
         deleteDoc, 
-        doc 
+        doc,
+        updateDoc
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
@@ -1479,17 +1480,12 @@
         }
 
         // Funciones de eliminación - SE MANTIENE IGUAL
-        window.eliminarIngreso = async function(id) {
+        window.eliminarIngreso = async function(firebaseId) {
+            if (!confirm('¿Estás seguro de eliminar este ingreso?')) return;
+            
             try {
                 if (auth.currentUser) {
-                    const q = query(
-                        collection(db, "users", auth.currentUser.uid, "ingresos"),
-                        where("id", "==", id)
-                    );
-                    const snap = await getDocs(q);
-                    for (const d of snap.docs) { 
-                        await deleteDoc(doc(db, d.ref.path));
-                    }
+                    await deleteDoc(doc(db, "users", auth.currentUser.uid, "ingresos", firebaseId));
                 }
             } catch (e) { 
                 console.warn("No se pudo borrar en Firestore:", e); 
@@ -1497,17 +1493,12 @@
             }
         }
 
-        window.eliminarGasto = async function(id) {
+        window.eliminarGasto = async function(firebaseId) {
+            if (!confirm('¿Estás seguro de eliminar este gasto?')) return;
+            
             try {
                 if (auth.currentUser) {
-                    const q = query(
-                        collection(db, "users", auth.currentUser.uid, "gastos"),
-                        where("id", "==", id)
-                    );
-                    const snap = await getDocs(q);
-                    for (const d of snap.docs) { 
-                        await deleteDoc(doc(db, d.ref.path));
-                    }
+                    await deleteDoc(doc(db, "users", auth.currentUser.uid, "gastos", firebaseId));
                 }
             } catch (e) { 
                 console.warn("No se pudo borrar en Firestore:", e); 
@@ -1515,17 +1506,12 @@
             }
         }
 
-        window.eliminarMeta = async function(id) {
+        window.eliminarMeta = async function(firebaseId) {
+            if (!confirm('¿Estás seguro de eliminar esta meta?')) return;
+            
             try {
                 if (auth.currentUser) {
-                    const q = query(
-                        collection(db, "users", auth.currentUser.uid, "metas"),
-                        where("id", "==", id)
-                    );
-                    const snap = await getDocs(q);
-                    for (const d of snap.docs) { 
-                        await deleteDoc(doc(db, d.ref.path));
-                    }
+                    await deleteDoc(doc(db, "users", auth.currentUser.uid, "metas", firebaseId));
                 }
             } catch (e) { 
                 console.warn("No se pudo borrar en Firestore:", e); 
@@ -1533,25 +1519,16 @@
             }
         }
 
-        window.actualizarAhorroMeta = async function(id) {
-            const meta = metas.find(m => m.id === id);
+       window.actualizarAhorroMeta = async function(firebaseId) {
+            const meta = metas.find(m => m.firebaseId === firebaseId);
             if (meta) {
                 const nuevoAhorro = prompt(`Ingresa el nuevo monto ahorrado para "${meta.nombre}":`, meta.ahorroActual);
                 if (nuevoAhorro !== null && !isNaN(nuevoAhorro)) {
                     try {
                         if (auth.currentUser) {
-                            const q = query(
-                                collection(db, "users", auth.currentUser.uid, "metas"),
-                                where("id", "==", id)
-                            );
-                            const snap = await getDocs(q);
-                            for (const d of snap.docs) { 
-                                await deleteDoc(doc(db, d.ref.path));
-                                await addDoc(
-                                    collection(db, "users", auth.currentUser.uid, "metas"),
-                                    { ...meta, ahorroActual: parseFloat(nuevoAhorro) }
-                                );
-                            }
+                            await updateDoc(doc(db, "users", auth.currentUser.uid, "metas", firebaseId), {
+                                ahorroActual: parseFloat(nuevoAhorro)
+                            });
                         }
                     } catch (e) {
                         console.warn("No se pudo actualizar en Firestore:", e);
@@ -1559,7 +1536,7 @@
                     }
                 }
             }
-        }
+         }
 
         // MODIFICADO: Configurar listeners optimizados
         function configurarListenersTiempoReal(uid) {
@@ -1623,6 +1600,7 @@
 </body>
 
 </html>
+
 
 
 
