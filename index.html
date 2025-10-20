@@ -485,7 +485,10 @@
         onAuthStateChanged,
         createUserWithEmailAndPassword,
         signInWithEmailAndPassword,
-        signOut 
+        signOut,
+        setPersistence,
+        browserSessionPersistence,
+        inMemoryPersistence
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -501,7 +504,14 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
-    
+    // Configurar persistencia de sesión (solo durante la sesión del navegador)
+    setPersistence(auth, browserSessionPersistence)
+        .then(() => {
+            console.log("Persistencia configurada: sesión del navegador");
+        })
+        .catch((error) => {
+            console.error("Error configurando persistencia:", error);
+        });
     // Elementos del DOM
     const loginSection = document.getElementById('loginSection');
     const mainApp = document.getElementById('mainApp');
@@ -518,7 +528,7 @@
 
         // MODIFICADO: Variable para controlar actualizaciones de gráficos
         let graficosCargados = false;
-
+        let inicializando = true;
         // Establecer fechas actuales - SE MANTIENE IGUAL
         document.getElementById('fechaIngreso').valueAsDate = new Date();
         document.getElementById('fechaGasto').valueAsDate = new Date();
@@ -579,9 +589,17 @@
         });
         // Observador de estado de autenticación
         onAuthStateChanged(auth, async (user) => {
+            console.log("Estado de autenticación:", user ? `Usuario: ${user.email}` : "Sin usuario");
+            
+            // Evitar ejecución durante la inicialización
+            if (inicializando) {
+                inicializando = false;
+                console.log("Inicialización completada");
+            }
+            
             if (user) {
                 // Usuario autenticado
-                console.log("Usuario autenticado:", user.email);
+                console.log("Mostrando aplicación para:", user.email);
                 loginSection.classList.add('hidden');
                 mainApp.classList.remove('hidden');
                 
@@ -598,22 +616,71 @@
                 
             } else {
                 // No hay usuario autenticado
-                console.log("No hay usuario autenticado");
+                console.log("Mostrando formulario de login");
                 loginSection.classList.remove('hidden');
                 mainApp.classList.add('hidden');
+                
+                // Forzar limpieza completa
+                ingresos = [];
+                gastos = [];
+                metas = [];
+                presupuestos = [];
+                
+                // Actualizar UI
+                actualizarIngresos();
+                actualizarGastos();
+                actualizarMetas();
+                actualizarPresupuesto();
+                actualizarResumen();
+                
+                // Limpiar gráficos
+                if (ingresosChart) { ingresosChart.destroy(); ingresosChart = null; }
+                if (gastosChart) { gastosChart.destroy(); gastosChart = null; }
+                if (comparativoChart) { comparativoChart.destroy(); comparativoChart = null; }
+                if (balanceChart) { balanceChart.destroy(); balanceChart = null; }
+                if (presupuestoChart) { presupuestoChart.destroy(); presupuestoChart = null; }
+                if (tendenciaAnualChart) { tendenciaAnualChart.destroy(); tendenciaAnualChart = null; }
+                
+                graficosCargados = false;
             }
         });
-        
-        // Función para cerrar sesión (opcional - puedes agregar un botón)
+                
+        // Función para cerrar sesión - MEJORADA
         window.cerrarSesion = async function() {
-            try {
-                await signOut(auth);
-                alert("Sesión cerrada correctamente");
-            } catch (error) {
-                console.error("Error al cerrar sesión:", error);
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                try {
+                    // Destruir todos los gráficos antes de cerrar sesión
+                    if (ingresosChart) ingresosChart.destroy();
+                    if (gastosChart) gastosChart.destroy();
+                    if (comparativoChart) comparativoChart.destroy();
+                    if (balanceChart) balanceChart.destroy();
+                    if (presupuestoChart) presupuestoChart.destroy();
+                    if (tendenciaAnualChart) tendenciaAnualChart.destroy();
+                    
+                    // Limpiar datos locales
+                    ingresos = [];
+                    gastos = [];
+                    metas = [];
+                    presupuestos = [];
+                    
+                    // Cerrar sesión
+                    await signOut(auth);
+                    
+                    // Forzar actualización de la UI
+                    actualizarIngresos();
+                    actualizarGastos();
+                    actualizarMetas();
+                    actualizarPresupuesto();
+                    actualizarResumen();
+                    
+                    console.log("Sesión cerrada y datos limpiados");
+                    
+                } catch (error) {
+                    console.error("Error al cerrar sesión:", error);
+                    alert("Error al cerrar sesión: " + error.message);
+                }
             }
         };
-
         // Navegación por pestañas - MODIFICADO: Optimizado para no recargar gráficos innecesariamente
         document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', () => {
@@ -1821,6 +1888,7 @@
 </body>
 
 </html>
+
 
 
 
