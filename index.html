@@ -72,7 +72,7 @@
             <!-- Botón para cambiar a registro -->
             <div class="mt-4 text-center">
                 <p class="text-sm text-gray-600">¿No tienes cuenta? 
-                    <button onclick="mostrarRegistro()" class="text-pink-600 hover:text-pink-800 font-medium">Regístrate aquí</button>
+                    <button type="button" id="btnMostrarRegistro" class="text-pink-600 hover:text-pink-800 font-medium">Regístrate aquí</button>
                 </p>
             </div>
         </div>
@@ -100,7 +100,7 @@
         <!-- Botón para cambiar a login -->
         <div class="mt-4 text-center">
             <p class="text-sm text-gray-600">¿Ya tienes cuenta? 
-                <button onclick="mostrarLogin()" class="text-green-600 hover:text-green-800 font-medium">Inicia sesión aquí</button>
+                <button type="button" id="btnMostrarLogin" class="text-green-600 hover:text-green-800 font-medium">Inicia sesión aquí</button>
             </p>
         </div>
     </div>
@@ -575,7 +575,19 @@
             document.getElementById('registroSection').classList.add('hidden');
             document.getElementById('loginSection').classList.remove('hidden');
         }
+    
+        document.addEventListener('DOMContentLoaded', function() {
+        const btnMostrarRegistro = document.getElementById('btnMostrarRegistro');
+        const btnMostrarLogin = document.getElementById('btnMostrarLogin');
         
+        if (btnMostrarRegistro) {
+            btnMostrarRegistro.addEventListener('click', mostrarRegistro);
+        }
+        
+        if (btnMostrarLogin) {
+            btnMostrarLogin.addEventListener('click', mostrarLogin);
+        }
+    });
         // Función para REGISTRAR usuario
         async function registrarUsuario(email, password) {
             try {
@@ -1979,4 +1991,5 @@
   </script>
 </body>
 </html>
+
 
