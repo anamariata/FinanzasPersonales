@@ -44,6 +44,27 @@
             height: 350px;
             position: relative;
         }
+
+        /* Estilos para el historial de pagos */
+        .pago-item {
+            border-left: 3px solid #10B981;
+            background: #f0fdf4;
+        }
+
+        .deuda-detalle {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .deuda-detalle.open {
+            max-height: 500px;
+        }
+
+        .historial-pagos {
+            background: #f8fafc;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-pink-50 to-rose-100 min-h-screen">
@@ -52,7 +73,7 @@
             <h1 class="text-4xl font-bold text-gray-800 mb-2">💰 Finanzas Personales</h1>
             <p class="text-gray-600">Control completo de tus ingresos, gastos y metas financieras en soles</p>
         </header>
-        
+        <!-- FORMULARIO DE LOGIN -->
         <div id="loginSection" class="bg-white rounded-xl shadow-lg p-6 mb-8 max-w-md mx-auto">
             <h2 class="text-2xl font-semibold text-gray-800 mb-4">🔐 Iniciar Sesión</h2>
             <form id="loginForm" class="space-y-4">
@@ -103,399 +124,565 @@
                 <button type="button" id="btnMostrarLogin" class="text-green-600 hover:text-green-800 font-medium">Inicia sesión aquí</button>
             </p>
         </div>
-    </div>
+        </div>
     <!-- Contenedor principal (se muestra después del login) -->
-    <div id="mainApp" class="hidden">
-        <!-- Navegación por pestañas -->
-        <nav class="bg-white rounded-xl shadow-lg p-2 mb-8">
-            <div class="flex flex-wrap gap-2 justify-between items-center">
-                <div class="flex flex-wrap gap-2">
-                    <button class="tab-button active px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="ingresos">💰 Ingresos</button>
-                    <button class="tab-button px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="gastos">💸 Gastos</button>
-                    <button class="tab-button px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="resumen">📊 Resumen</button>
-                    <button class="tab-button px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="metas">🎯 Metas</button>
-                    <button class="tab-button px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="presupuesto">📅 Presupuesto</button>
-                    <button class="tab-button px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="anual">📆 Resumen Anual</button>
+        <div id="mainApp" class="hidden">
+            <!-- Navegación por pestañas -->
+            <nav class="bg-white rounded-xl shadow-lg p-2 mb-8">
+                <div class="flex flex-wrap gap-2 justify-between items-center">
+                    <div class="flex flex-wrap gap-2">
+                        <button class="tab-button active px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="ingresos">💰 Ingresos</button>
+                        <button class="tab-button px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="gastos">💸 Gastos</button>
+                        <button class="tab-button px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="resumen">📊 Resumen</button>
+                        <button class="tab-button px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="metas">🎯 Metas</button>
+                        <button class="tab-button px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="presupuesto">📅 Presupuesto</button>
+                        <button class="tab-button px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="anual">📆 Resumen Anual</button>
+                        <button class="tab-button px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="deudas">📋 Deudas</button>
+                        <button class="tab-button px-4 py-2 rounded-lg transition duration-200 font-medium" data-tab="prestamos">🏦 Préstamos</button>
+                    </div>
+                    <button onclick="cerrarSesion()" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition duration-200 text-sm font-medium">
+                        🚪 Cerrar Sesión
+                    </button>
                 </div>
-                <button onclick="cerrarSesion()" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition duration-200 text-sm font-medium">
-                    🚪 Cerrar Sesión
-                </button>
-            </div>
-        </nav>
-        <main>
-            <!-- SECCIÓN INGRESOS -->
-            <div id="ingresos" class="tab-content active">
-                <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-green-400">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">💰 Registrar Ingreso</h2>
-                    <form id="ingresoForm" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label for="fechaIngreso" class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
-                                <input type="date" id="fechaIngreso" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+            </nav>
+            <main>
+                <!-- SECCIÓN INGRESOS -->
+                <div id="ingresos" class="tab-content active">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-green-400">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-4">💰 Registrar Ingreso</h2>
+                        <form id="ingresoForm" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="fechaIngreso" class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+                                    <input type="date" id="fechaIngreso" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label for="fuenteIngreso" class="block text-sm font-medium text-gray-700 mb-2">Fuente</label>
+                                    <select id="fuenteIngreso" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                        <option value="">Selecciona fuente</option>
+                                        <option value="Sueldo">💼 Sueldo</option>
+                                        <option value="Freelance">💻 Freelance</option>
+                                        <option value="Venta">🛍️ Venta</option>
+                                        <option value="Inversión">📈 Inversión</option>
+                                        <option value="Bono">🎁 Bono</option>
+                                        <option value="Préstamo">💸 Préstamo</option>
+                                        <option value="Otros">📦 Otros</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="montoIngreso" class="block text-sm font-medium text-gray-700 mb-2">Monto (S/)</label>
+                                    <input type="number" id="montoIngreso" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="0.00">
+                                </div>
                             </div>
-                            <div>
-                                <label for="fuenteIngreso" class="block text-sm font-medium text-gray-700 mb-2">Fuente</label>
-                                <select id="fuenteIngreso" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                                    <option value="">Selecciona fuente</option>
-                                    <option value="Sueldo">💼 Sueldo</option>
-                                    <option value="Freelance">💻 Freelance</option>
-                                    <option value="Venta">🛍️ Venta</option>
-                                    <option value="Inversión">📈 Inversión</option>
-                                    <option value="Bono">🎁 Bono</option>
-                                    <option value="Otros">📦 Otros</option>
-                                </select>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="tipoIngreso" class="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
+                                    <select id="tipoIngreso" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                        <option value="">Selecciona tipo</option>
+                                        <option value="Fijo">🔒 Fijo</option>
+                                        <option value="Variable">🔄 Variable</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="metodoPagoIngreso" class="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
+                                    <select id="metodoPagoIngreso" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                        <option value="">Selecciona método</option>
+                                        <option value="Efectivo">💵 Efectivo</option>
+                                        <option value="Tarjeta">💳 Tarjeta</option>
+                                        <option value="Transferencia">🏦 Transferencia</option>
+                                        <option value="Yape/Plin">📱 Yape/Plin</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="comentariosIngreso" class="block text-sm font-medium text-gray-700 mb-2">Comentarios</label>
+                                    <input type="text" id="comentariosIngreso" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Comentarios adicionales...">
+                                </div>
                             </div>
-                            <div>
-                                <label for="montoIngreso" class="block text-sm font-medium text-gray-700 mb-2">Monto (S/)</label>
-                                <input type="number" id="montoIngreso" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="0.00">
+                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                                ➕ Agregar Ingreso
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Resumen y gráfico de ingresos -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">📊 Total Mensual</h3>
+                            <div class="text-3xl font-bold text-green-600 mb-2">S/ <span id="totalIngresosMes">0.00</span></div>
+                            <p class="text-gray-600">Ingresos del mes actual</p>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">📈 Evolución de Ingresos</h3>
+                            <div class="chart-container">
+                                <canvas id="ingresosChart"></canvas>
                             </div>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label for="tipoIngreso" class="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
-                                <select id="tipoIngreso" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                                    <option value="">Selecciona tipo</option>
-                                    <option value="Fijo">🔒 Fijo</option>
-                                    <option value="Variable">🔄 Variable</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="metodoPagoIngreso" class="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
-                                <select id="metodoPagoIngreso" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                                    <option value="">Selecciona método</option>
-                                    <option value="Efectivo">💵 Efectivo</option>
-                                    <option value="Tarjeta">💳 Tarjeta</option>
-                                    <option value="Transferencia">🏦 Transferencia</option>
-                                    <option value="Yape/Plin">📱 Yape/Plin</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="comentariosIngreso" class="block text-sm font-medium text-gray-700 mb-2">Comentarios</label>
-                                <input type="text" id="comentariosIngreso" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="Comentarios adicionales...">
-                            </div>
+                    </div>
+
+                    <!-- Lista de ingresos -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-semibold text-gray-800">Historial de Ingresos</h3>
+                            <div class="text-lg font-bold text-green-600">Total: S/ <span id="totalIngresos">0.00</span></div>
                         </div>
-                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
-                            ➕ Agregar Ingreso
-                        </button>
-                    </form>
+                        <div id="listaIngresos" class="space-y-3">
+                            <p class="text-gray-500 text-center py-8">No hay ingresos registrados</p>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Resumen y gráfico de ingresos -->
+                <!-- SECCIÓN GASTOS -->
+                <div id="gastos" class="tab-content">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-pink-400">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-4">💸 Registrar Gasto</h2>
+                        <form id="gastoForm" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="fechaGasto" class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+                                    <input type="date" id="fechaGasto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label for="categoriaGasto" class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+                                    <select id="categoriaGasto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                        <option value="">Selecciona categoría</option>
+                                        <option value="Alimentación">🍽️ Alimentación</option>
+                                        <option value="Transporte">🚗 Transporte</option>
+                                        <option value="Ocio">🎬 Ocio</option>
+                                        <option value="Salud">🏥 Salud</option>
+                                        <option value="Servicios">💡 Servicios</option>
+                                        <option value="Compras">🛍️ Compras</option>
+                                        <option value="Educación">📚 Educación</option>
+                                        <option value="Deudas">🧾 Deudas</option>
+                                        <option value="Ahorro">💎 Ahorro</option>
+                                        <option value="Otros">📦 Otros</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="montoGasto" class="block text-sm font-medium text-gray-700 mb-2">Monto (S/)</label>
+                                    <input type="number" id="montoGasto" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="descripcionGasto" class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+                                    <input type="text" id="descripcionGasto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Descripción del gasto">
+                                </div>
+                                <div>
+                                    <label for="metodoPagoGasto" class="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
+                                    <select id="metodoPagoGasto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                        <option value="">Selecciona método</option>
+                                        <option value="Efectivo">💵 Efectivo</option>
+                                        <option value="Tarjeta">💳 Tarjeta</option>
+                                        <option value="Transferencia">🏦 Transferencia</option>
+                                        <option value="Yape/Plin">📱 Yape/Plin</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="tipoGasto" class="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
+                                    <select id="tipoGasto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                                        <option value="">Selecciona tipo</option>
+                                        <option value="Fijo">🔒 Fijo</option>
+                                        <option value="Variable">🔄 Variable</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                                ➕ Agregar Gasto
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Resumen y gráfico de gastos -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">📊 Gastos por Categoría</h3>
+                            <div id="gastosPorCategoria" class="space-y-2">
+                                <p class="text-gray-500">No hay gastos registrados</p>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">🌸 Distribución de Gastos</h3>
+                            <div class="chart-container">
+                                <canvas id="gastosChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Lista de gastos -->
                     <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-semibold text-gray-800">Historial de Gastos</h3>
+                            <div class="text-lg font-bold text-pink-600">Total: S/ <span id="totalGastos">0.00</span></div>
+                        </div>
+                        <div id="listaGastos" class="space-y-3">
+                            <p class="text-gray-500 text-center py-8">No hay gastos registrados</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN RESUMEN FINANCIERO -->
+                <div id="resumen" class="tab-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-400">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">💰 Ingresos del Mes</h3>
+                            <p class="text-3xl font-bold text-green-600">S/ <span id="resumenIngresosMes">0.00</span></p>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-pink-400">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">💸 Gastos del Mes</h3>
+                            <p class="text-3xl font-bold text-pink-600">S/ <span id="resumenGastosMes">0.00</span></p>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-400">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">📊 Balance Mensual</h3>
+                            <p class="text-3xl font-bold" id="balanceTexto">S/ <span id="resumenBalance">0.00</span></p>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-400">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">💎 % de Ahorro</h3>
+                            <p class="text-3xl font-bold text-purple-600"><span id="porcentajeAhorro">0</span>%</p>
+                        </div>
+                    </div>
+
+                    <!-- Indicador visual -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">🎯 Estado Financiero</h3>
+                        <div id="indicadorFinanciero" class="p-6 rounded-lg text-center">
+                            <div class="text-4xl mb-2" id="iconoEstado">💰</div>
+                            <div class="text-xl font-semibold" id="textoEstado">Registra tus primeros movimientos</div>
+                            <div class="text-gray-600 mt-2" id="descripcionEstado">Agrega ingresos y gastos para ver tu estado financiero</div>
+                        </div>
+                    </div>
+
+                    <!-- Gráficos comparativos -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">📈 Comparación Mensual</h3>
+                            <div class="chart-container-lg">
+                                <canvas id="comparativoChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">📊 Evolución del Balance</h3>
+                            <div class="chart-container-lg">
+                                <canvas id="balanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- SECCIÓN METAS -->
+                <div id="metas" class="tab-content">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-purple-400">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-4">🎯 Nueva Meta de Ahorro</h2>
+                        <form id="metaForm" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="nombreMeta" class="block text-sm font-medium text-gray-700 mb-2">Meta</label>
+                                    <input type="text" id="nombreMeta" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Ej: Viaje, Fondo de emergencia, Nuevo celular">
+                                </div>
+                                <div>
+                                    <label for="montoObjetivo" class="block text-sm font-medium text-gray-700 mb-2">Monto Objetivo (S/)</label>
+                                    <input type="number" id="montoObjetivo" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="ahorroActual" class="block text-sm font-medium text-gray-700 mb-2">Ahorro Actual (S/)</label>
+                                    <input type="number" id="ahorroActual" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="0.00">
+                                </div>
+                                <div>
+                                    <label for="fechaLimite" class="block text-sm font-medium text-gray-700 mb-2">Fecha Límite</label>
+                                    <input type="date" id="fechaLimite" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                                🎯 Crear Meta
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Lista de metas -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Mis Metas de Ahorro</h3>
+                        <div id="listaMetas" class="space-y-4">
+                            <p class="text-gray-500 text-center py-8">No hay metas registradas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN PRESUPUESTO MENSUAL -->
+                 
+                <div id="presupuesto" class="tab-content">
+                        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
                         <h3 class="text-xl font-semibold text-gray-800 mb-4">📊 Total Mensual</h3>
-                        <div class="text-3xl font-bold text-green-600 mb-2">S/ <span id="totalIngresosMes">0.00</span></div>
+                        <div class="text-3xl font-bold text-green-600 mb-2">S/ <span id="totalIngresosMesPresupuesto">0.00</span></div>
                         <p class="text-gray-600">Ingresos del mes actual</p>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-lg p-6">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-4">📈 Evolución de Ingresos</h3>
-                        <div class="chart-container">
-                            <canvas id="ingresosChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Lista de ingresos -->
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-semibold text-gray-800">Historial de Ingresos</h3>
-                        <div class="text-lg font-bold text-green-600">Total: S/ <span id="totalIngresos">0.00</span></div>
-                    </div>
-                    <div id="listaIngresos" class="space-y-3">
-                        <p class="text-gray-500 text-center py-8">No hay ingresos registrados</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECCIÓN GASTOS -->
-            <div id="gastos" class="tab-content">
-                <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-pink-400">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">💸 Registrar Gasto</h2>
-                    <form id="gastoForm" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label for="fechaGasto" class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
-                                <input type="date" id="fechaGasto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
+                         </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-blue-400">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-4">📅 Configurar Presupuesto Mensual</h2>
+                        <form id="presupuestoForm" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="categoriaPresupuesto" class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+                                    <select id="categoriaPresupuesto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">Selecciona categoría</option>
+                                        <option value="Alimentación">🍽️ Alimentación</option>
+                                        <option value="Transporte">🚗 Transporte</option>
+                                        <option value="Ocio">🎬 Ocio</option>
+                                        <option value="Salud">🏥 Salud</option>
+                                        <option value="Servicios">💡 Servicios</option>
+                                        <option value="Compras">🛍️ Compras</option>
+                                        <option value="Educación">📚 Educación</option>
+                                        <option value="Deudas">🧾 Deudas</option>
+                                        <option value="Ahorro">💎 Ahorro</option>
+                                        <option value="Otros">📦 Otros</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="montoPresupuesto" class="block text-sm font-medium text-gray-700 mb-2">Presupuesto Planeado (S/)</label>
+                                    <input type="number" id="montoPresupuesto" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0.00">
+                                </div>
                             </div>
-                            <div>
-                                <label for="categoriaGasto" class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
-                                <select id="categoriaGasto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
-                                    <option value="">Selecciona categoría</option>
-                                    <option value="Alimentación">🍽️ Alimentación</option>
-                                    <option value="Transporte">🚗 Transporte</option>
-                                    <option value="Ocio">🎬 Ocio</option>
-                                    <option value="Salud">🏥 Salud</option>
-                                    <option value="Servicios">💡 Servicios</option>
-                                    <option value="Compras">🛍️ Compras</option>
-                                    <option value="Educación">📚 Educación</option>
-                                    <option value="Otros">📦 Otros</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="montoGasto" class="block text-sm font-medium text-gray-700 mb-2">Monto (S/)</label>
-                                <input type="number" id="montoGasto" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="0.00">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label for="descripcionGasto" class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
-                                <input type="text" id="descripcionGasto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" placeholder="Descripción del gasto">
-                            </div>
-                            <div>
-                                <label for="metodoPagoGasto" class="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
-                                <select id="metodoPagoGasto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
-                                    <option value="">Selecciona método</option>
-                                    <option value="Efectivo">💵 Efectivo</option>
-                                    <option value="Tarjeta">💳 Tarjeta</option>
-                                    <option value="Transferencia">🏦 Transferencia</option>
-                                    <option value="Yape/Plin">📱 Yape/Plin</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="tipoGasto" class="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
-                                <select id="tipoGasto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
-                                    <option value="">Selecciona tipo</option>
-                                    <option value="Fijo">🔒 Fijo</option>
-                                    <option value="Variable">🔄 Variable</option>
-                                </select>
-                            </div>
-                        </div>
-                        <button type="submit" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
-                            ➕ Agregar Gasto
-                        </button>
-                    </form>
-                </div>
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                                📅 Establecer Presupuesto
+                            </button>
+                        </form>
+                    </div>
 
-                <!-- Resumen y gráfico de gastos -->
-               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <div class="bg-white rounded-xl shadow-lg p-6">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-4">📊 Gastos por Categoría</h3>
-                        <div id="gastosPorCategoria" class="space-y-2">
-                            <p class="text-gray-500">No hay gastos registrados</p>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-lg p-6">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-4">🌸 Distribución de Gastos</h3>
-                        <div class="chart-container">
-                            <canvas id="gastosChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <!-- Lista de gastos -->
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-semibold text-gray-800">Historial de Gastos</h3>
-                        <div class="text-lg font-bold text-pink-600">Total: S/ <span id="totalGastos">0.00</span></div>
-                    </div>
-                    <div id="listaGastos" class="space-y-3">
-                        <p class="text-gray-500 text-center py-8">No hay gastos registrados</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECCIÓN RESUMEN FINANCIERO -->
-            <div id="resumen" class="tab-content">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-400">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-2">💰 Ingresos del Mes</h3>
-                        <p class="text-3xl font-bold text-green-600">S/ <span id="resumenIngresosMes">0.00</span></p>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-pink-400">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-2">💸 Gastos del Mes</h3>
-                        <p class="text-3xl font-bold text-pink-600">S/ <span id="resumenGastosMes">0.00</span></p>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-400">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-2">📊 Balance Mensual</h3>
-                        <p class="text-3xl font-bold" id="balanceTexto">S/ <span id="resumenBalance">0.00</span></p>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-400">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-2">💎 % de Ahorro</h3>
-                        <p class="text-3xl font-bold text-purple-600"><span id="porcentajeAhorro">0</span>%</p>
-                    </div>
-                </div>
-
-                <!-- Indicador visual -->
-                <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">🎯 Estado Financiero</h3>
-                    <div id="indicadorFinanciero" class="p-6 rounded-lg text-center">
-                        <div class="text-4xl mb-2" id="iconoEstado">💰</div>
-                        <div class="text-xl font-semibold" id="textoEstado">Registra tus primeros movimientos</div>
-                        <div class="text-gray-600 mt-2" id="descripcionEstado">Agrega ingresos y gastos para ver tu estado financiero</div>
-                    </div>
-                </div>
-
-                <!-- Gráficos comparativos -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-xl shadow-lg p-6">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-4">📈 Comparación Mensual</h3>
+                    <!-- Gráfico comparativo -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">🌸 Gráfico Comparativo</h3>
                         <div class="chart-container-lg">
-                            <canvas id="comparativoChart"></canvas>
+                            <canvas id="presupuestoChart"></canvas>
                         </div>
                     </div>
+
+                    <!-- Tabla comparativa -->
                     <div class="bg-white rounded-xl shadow-lg p-6">
-                        <h3 class="text-xl font-semibold text-gray-800 mb-4">📊 Evolución del Balance</h3>
-                        <div class="chart-container-lg">
-                            <canvas id="balanceChart"></canvas>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Presupuesto vs Gasto Real</h3>
+                        <div id="tablaPresupuesto" class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3">Categoría</th>
+                                        <th class="px-6 py-3">Presupuesto Planeado</th>
+                                        <th class="px-6 py-3">Gasto Real</th>
+                                        <th class="px-6 py-3">Diferencia</th>
+                                        <th class="px-6 py-3">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cuerpoTablaPresupuesto">
+                                    <tr>
+                                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">No hay presupuestos configurados</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-            </div>
-            <!-- SECCIÓN METAS -->
-            <div id="metas" class="tab-content">
-                <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-purple-400">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">🎯 Nueva Meta de Ahorro</h2>
-                    <form id="metaForm" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="nombreMeta" class="block text-sm font-medium text-gray-700 mb-2">Meta</label>
-                                <input type="text" id="nombreMeta" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="Ej: Viaje, Fondo de emergencia, Nuevo celular">
-                            </div>
-                            <div>
-                                <label for="montoObjetivo" class="block text-sm font-medium text-gray-700 mb-2">Monto Objetivo (S/)</label>
-                                <input type="number" id="montoObjetivo" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="0.00">
-                            </div>
+
+                <!-- SECCIÓN RESUMEN ANUAL -->
+                <div id="anual" class="tab-content">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-4">📆 Resumen Anual <span id="anioActual">2024</span></h2>
+                        
+                        <!-- Selector de año -->
+                        <div class="mb-6">
+                            <label for="selectorAnio" class="block text-sm font-medium text-gray-700 mb-2">Seleccionar Año</label>
+                            <select id="selectorAnio" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                                <option value="2022">2022</option>
+                            </select>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="ahorroActual" class="block text-sm font-medium text-gray-700 mb-2">Ahorro Actual (S/)</label>
-                                <input type="number" id="ahorroActual" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="0.00">
-                            </div>
-                            <div>
-                                <label for="fechaLimite" class="block text-sm font-medium text-gray-700 mb-2">Fecha Límite</label>
-                                <input type="date" id="fechaLimite" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                            </div>
+
+                        <!-- Tabla resumen anual -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-gray-700 uppercase bg-gradient-to-r from-pink-50 to-rose-50">
+                                    <tr>
+                                        <th class="px-6 py-3">Mes</th>
+                                        <th class="px-6 py-3">Ingresos (S/)</th>
+                                        <th class="px-6 py-3">Gastos (S/)</th>
+                                        <th class="px-6 py-3">Ahorro (S/)</th>
+                                        <th class="px-6 py-3">Balance (S/)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaResumenAnual">
+                                    <!-- Se llena dinámicamente -->
+                                </tbody>
+                                <tfoot class="bg-gray-50 font-semibold">
+                                    <tr>
+                                        <td class="px-6 py-3">TOTAL ANUAL</td>
+                                        <td class="px-6 py-3 text-green-600" id="totalIngresosAnual">S/ 0.00</td>
+                                        <td class="px-6 py-3 text-pink-600" id="totalGastosAnual">S/ 0.00</td>
+                                        <td class="px-6 py-3 text-purple-600" id="totalAhorroAnual">S/ 0.00</td>
+                                        <td class="px-6 py-3" id="totalBalanceAnual">S/ 0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
                         </div>
-                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
-                            🎯 Crear Meta
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Lista de metas -->
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Mis Metas de Ahorro</h3>
-                    <div id="listaMetas" class="space-y-4">
-                        <p class="text-gray-500 text-center py-8">No hay metas registradas</p>
                     </div>
-                </div>
-            </div>
 
-            <!-- SECCIÓN PRESUPUESTO MENSUAL -->
-            <div id="presupuesto" class="tab-content">
-                <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-blue-400">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">📅 Configurar Presupuesto Mensual</h2>
-                    <form id="presupuestoForm" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="categoriaPresupuesto" class="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
-                                <select id="categoriaPresupuesto" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <option value="">Selecciona categoría</option>
-                                    <option value="Alimentación">🍽️ Alimentación</option>
-                                    <option value="Transporte">🚗 Transporte</option>
-                                    <option value="Ocio">🎬 Ocio</option>
-                                    <option value="Salud">🏥 Salud</option>
-                                    <option value="Servicios">💡 Servicios</option>
-                                    <option value="Compras">🛍️ Compras</option>
-                                    <option value="Educación">📚 Educación</option>
-                                    <option value="Otros">📦 Otros</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="montoPresupuesto" class="block text-sm font-medium text-gray-700 mb-2">Presupuesto Planeado (S/)</label>
-                                <input type="number" id="montoPresupuesto" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0.00">
-                            </div>
+                    <!-- Gráfico de tendencia anual -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">📈 Tendencia Anual</h3>
+                        <div class="chart-container-xl">
+                            <canvas id="tendenciaAnualChart"></canvas>
                         </div>
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
-                            📅 Establecer Presupuesto
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Gráfico comparativo -->
-                <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">🌸 Gráfico Comparativo</h3>
-                    <div class="chart-container-lg">
-                        <canvas id="presupuestoChart"></canvas>
                     </div>
                 </div>
 
-                <!-- Tabla comparativa -->
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Presupuesto vs Gasto Real</h3>
-                    <div id="tablaPresupuesto" class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3">Categoría</th>
-                                    <th class="px-6 py-3">Presupuesto Planeado</th>
-                                    <th class="px-6 py-3">Gasto Real</th>
-                                    <th class="px-6 py-3">Diferencia</th>
-                                    <th class="px-6 py-3">Estado</th>
-                                </tr>
-                            </thead>
-                            <tbody id="cuerpoTablaPresupuesto">
-                                <tr>
-                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">No hay presupuestos configurados</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <!-- SECCIÓN DEUDAS -->
+                <div id="deudas" class="tab-content">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-orange-400">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-4">📋 Registrar Deuda</h2>
+                        <form id="deudaForm" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="tipoDeuda" class="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
+                                    <select id="tipoDeuda" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                        <option value="">Selecciona tipo</option>
+                                        <option value="Deuda">🔴 Empresa</option>
+                                        <option value="Deuda">🔵 Personal</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="conceptoDeuda" class="block text-sm font-medium text-gray-700 mb-2">Concepto</label>
+                                    <input type="text" id="conceptoDeuda" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Ej: Préstamo personal, Tarjeta de crédito, etc.">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="montoTotalDeuda" class="block text-sm font-medium text-gray-700 mb-2">Monto Total (S/)</label>
+                                    <input type="number" id="montoTotalDeuda" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="0.00">
+                                </div>
+                                <div>
+                                    <label for="saldoPendiente" class="block text-sm font-medium text-gray-700 mb-2">Saldo Pendiente (S/)</label>
+                                    <input type="number" id="saldoPendiente" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="0.00">
+                                </div>
+                                <div>
+                                    <label for="tasaInteres" class="block text-sm font-medium text-gray-700 mb-2">Tasa de Interés (%)</label>
+                                    <input type="number" id="tasaInteres" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="fechaInicioDeuda" class="block text-sm font-medium text-gray-700 mb-2">Fecha de Inicio</label>
+                                    <input type="date" id="fechaInicioDeuda" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label for="fechaVencimiento" class="block text-sm font-medium text-gray-700 mb-2">Fecha de Vencimiento</label>
+                                    <input type="date" id="fechaVencimiento" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="descripcionDeuda" class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+                                <textarea id="descripcionDeuda" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent" placeholder="Descripción adicional..."></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                                ➕ Agregar Deuda/Préstamo
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Resumen de deudas -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-400">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">🔴 Total Deudas</h3>
+                            <p class="text-3xl font-bold text-red-600">S/ <span id="totalDeudas">0.00</span></p>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-400">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">💰 Total Deuda Pagada</h3>
+                            <p class="text-3xl font-bold text-green-600">S/ <span id="totalDeudaPagada">0.00</span></p>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-400">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">⚖️ Balance Neto</h3>
+                            <p class="text-3xl font-bold" id="balanceDeudasTexto">S/ <span id="balanceDeudas">0.00</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Lista de deudas y préstamos -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">📋 Lista de Deudas</h3>
+                        <div id="listaDeudas" class="space-y-4">
+                            <p class="text-gray-500 text-center py-8">No hay deudas o préstamos registrados</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- SECCIÓN RESUMEN ANUAL -->
-            <div id="anual" class="tab-content">
-                <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">📆 Resumen Anual <span id="anioActual">2024</span></h2>
-                    
-                    <!-- Selector de año -->
-                    <div class="mb-6">
-                        <label for="selectorAnio" class="block text-sm font-medium text-gray-700 mb-2">Seleccionar Año</label>
-                        <select id="selectorAnio" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="2024">2024</option>
-                            <option value="2023">2023</option>
-                            <option value="2022">2022</option>
-                        </select>
+                
+                <!-- SECCIÓN PRÉSTAMOS -->
+                <div id="prestamos" class="tab-content">
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-blue-400">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-4">🏦 Registrar Préstamo</h2>
+                        <form id="prestamoForm" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="conceptoPrestamo" class="block text-sm font-medium text-gray-700 mb-2">Concepto</label>
+                                    <input type="text" id="conceptoPrestamo" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Ej: Préstamo a Juan, Inversión en negocio, etc.">
+                                </div>
+                                <div>
+                                    <label for="deudorPrestamo" class="block text-sm font-medium text-gray-700 mb-2">Deudor</label>
+                                    <input type="text" id="deudorPrestamo" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Nombre de la persona/empresa">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="montoTotalPrestamo" class="block text-sm font-medium text-gray-700 mb-2">Monto Total (S/)</label>
+                                    <input type="number" id="montoTotalPrestamo" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0.00">
+                                </div>
+                                <div>
+                                    <label for="saldoPendientePrestamo" class="block text-sm font-medium text-gray-700 mb-2">Saldo Pendiente (S/)</label>
+                                    <input type="number" id="saldoPendientePrestamo" step="0.01" min="0" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0.00">
+                                </div>
+                                <div>
+                                    <label for="tasaInteresPrestamo" class="block text-sm font-medium text-gray-700 mb-2">Tasa de Interés (%)</label>
+                                    <input type="number" id="tasaInteresPrestamo" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="fechaInicioPrestamo" class="block text-sm font-medium text-gray-700 mb-2">Fecha de Inicio</label>
+                                    <input type="date" id="fechaInicioPrestamo" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label for="fechaVencimientoPrestamo" class="block text-sm font-medium text-gray-700 mb-2">Fecha de Vencimiento</label>
+                                    <input type="date" id="fechaVencimientoPrestamo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="descripcionPrestamo" class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+                                <textarea id="descripcionPrestamo" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Descripción adicional..."></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200">
+                                ➕ Agregar Préstamo
+                            </button>
+                        </form>
                     </div>
 
-                    <!-- Tabla resumen anual -->
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="text-xs text-gray-700 uppercase bg-gradient-to-r from-pink-50 to-rose-50">
-                                <tr>
-                                    <th class="px-6 py-3">Mes</th>
-                                    <th class="px-6 py-3">Ingresos (S/)</th>
-                                    <th class="px-6 py-3">Gastos (S/)</th>
-                                    <th class="px-6 py-3">Ahorro (S/)</th>
-                                    <th class="px-6 py-3">Balance (S/)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tablaResumenAnual">
-                                <!-- Se llena dinámicamente -->
-                            </tbody>
-                            <tfoot class="bg-gray-50 font-semibold">
-                                <tr>
-                                    <td class="px-6 py-3">TOTAL ANUAL</td>
-                                    <td class="px-6 py-3 text-green-600" id="totalIngresosAnual">S/ 0.00</td>
-                                    <td class="px-6 py-3 text-pink-600" id="totalGastosAnual">S/ 0.00</td>
-                                    <td class="px-6 py-3 text-purple-600" id="totalAhorroAnual">S/ 0.00</td>
-                                    <td class="px-6 py-3" id="totalBalanceAnual">S/ 0.00</td>
-                                </tr>
-                            </tfoot>
-                        </table>
+                    <!-- Resumen de préstamos -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-400">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">💰 Total Préstamos Activos</h3>
+                            <p class="text-3xl font-bold text-green-600">S/ <span id="totalPrestamosActivos">0.00</span></p>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-400">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">🏦 Total Recuperado</h3>
+                            <p class="text-3xl font-bold text-blue-600">S/ <span id="totalPrestamosRecuperados">0.00</span></p>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-400">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">📈 Balance Préstamos</h3>
+                            <p class="text-3xl font-bold text-purple-600">S/ <span id="balancePrestamos">0.00</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Lista de préstamos -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">📋 Lista de Préstamos</h3>
+                        <div id="listaPrestamos" class="space-y-4">
+                            <p class="text-gray-500 text-center py-8">No hay préstamos registrados</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Gráfico de tendencia anual -->
-                <div class="bg-white rounded-xl shadow-lg p-6">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">📈 Tendencia Anual</h3>
-                    <div class="chart-container-xl">
-                        <canvas id="tendenciaAnualChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
+            </main>
+        </div>
 </div>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -548,12 +735,14 @@
     const mainApp = document.getElementById('mainApp');
     const loginForm = document.getElementById('loginForm');
 
-// Variables globales - SE MANTIENE IGUAL
+    // Variables globales - SE MANTIENE IGUAL
         let ingresos = [];
         let gastos = [];
         let metas = [];
         let presupuestos = [];
-        
+        let deudas = [];
+        let deudasChart;
+        let prestamos = [];
         // Charts globales - SE MANTIENE IGUAL
         let ingresosChart, gastosChart, comparativoChart, balanceChart, presupuestoChart, tendenciaAnualChart;
 
@@ -812,8 +1001,13 @@
                         if (tabId === 'ingresos' && document.getElementById('ingresosChart')) actualizarGraficoIngresos();
                         if (tabId === 'gastos' && document.getElementById('gastosChart')) actualizarGraficoGastos();
                         if (tabId === 'resumen') actualizarGraficosResumen();
-                        if (tabId === 'presupuesto' && document.getElementById('presupuestoChart')) actualizarGraficoPresupuesto();
+                        if (tabId === 'presupuesto') {
+                            actualizarPresupuesto(); // AGREGAR ESTA LÍNEA
+                            if (document.getElementById('presupuestoChart')) actualizarGraficoPresupuesto();
+                        }
                         if (tabId === 'anual') actualizarResumenAnual();
+                        if (tabId === 'deudas') actualizarDeudas();
+                        if (tabId === 'prestamos') actualizarPrestamos();
                     }, 100);
                 }
             });
@@ -870,6 +1064,67 @@
                         collection(db, "users", auth.currentUser.uid, "gastos"),
                         nuevoGasto
                     );
+
+                    if (nuevoGasto.categoria === 'Deudas') {
+                    // listar deudas por concepto para elegir
+                    const opciones = deudas.map(d => `${d.id} - ${d.concepto} (Pend: S/ ${d.saldoPendiente.toFixed(2)})`).join('\n');
+                    const elegido = prompt(`Aplica este pago a qué deuda?\n${opciones}\n\nEscribe el ID numérico (antes del guión):`, "");
+                    if (elegido) {
+                        const target = deudas.find(d => d.id === parseInt(elegido));
+                        if (target) {
+                        // registrar pago igual que abonarDeuda
+                        try {
+                            const basePath = `users/${auth.currentUser.uid}/deudas`;
+                            const docId = await findDocIdByCustomId(basePath, target.id);
+                            if (docId) {
+                            const nuevoSaldo = Math.max(0, target.saldoPendiente - nuevoGasto.monto);
+                            await updateDoc(doc(db, basePath, docId), { saldoPendiente: nuevoSaldo });
+                            await addDoc(collection(db, basePath, docId, "pagos"), {
+                                monto: nuevoGasto.monto,
+                                fecha: nuevoGasto.fecha || new Date().toISOString(),
+                                nota: nuevoGasto.descripcion || "Pago registrado desde Gastos"
+                            });
+                            }
+                        } catch (e) {
+                            console.warn("No se pudo vincular el gasto con la deuda:", e);
+                        }
+                        }
+                    }
+                    }
+
+                    if (nuevoGasto.categoria === 'Ahorro') {
+                    // elegir meta
+                    if (metas.length === 0) {
+                        alert("No tienes metas aún. Crea una meta para registrar aportes.");
+                    } else {
+                        let metaTarget = null;
+                        if (metas.length === 1) {
+                        metaTarget = metas[0];
+                        } else {
+                        const ops = metas.map(m => `${m.id} - ${m.nombre} (Ahorrado: S/ ${m.ahorroActual.toFixed(2)})`).join('\n');
+                        const elegido = prompt(`¿A cuál meta aplicar este ahorro?\n${ops}\n\nEscribe el ID numérico:`, "");
+                        if (elegido) metaTarget = metas.find(m => m.id === parseInt(elegido));
+                        }
+
+                        if (metaTarget) {
+                        try {
+                            const basePath = `users/${auth.currentUser.uid}/metas`;
+                            const docId = await findDocIdByCustomId(basePath, metaTarget.id);
+                            if (docId) {
+                            const nuevoAhorro = (metaTarget.ahorroActual || 0) + nuevoGasto.monto;
+                            await updateDoc(doc(db, basePath, docId), { ahorroActual: nuevoAhorro });
+                            await addDoc(collection(db, basePath, docId, "aportes"), {
+                                monto: nuevoGasto.monto,
+                                fecha: nuevoGasto.fecha || new Date().toISOString(),
+                                nota: nuevoGasto.descripcion || "Aporte desde Gastos"
+                            });
+                            }
+                        } catch (e) {
+                            console.warn("No se pudo registrar el aporte en la meta:", e);
+                        }
+                        }
+                    }
+                    }
                 }
             } catch (err) {
                 console.warn("No se pudo guardar gasto en Firestore:", err);
@@ -934,7 +1189,72 @@
 
         // Selector de año - SE MANTIENE IGUAL
         document.getElementById('selectorAnio').addEventListener('change', actualizarResumenAnual);
+        
+        // fOrm de Deudas
+        document.getElementById('deudaForm').addEventListener('submit', async (e) => {e.preventDefault();
+    
+            const nuevaDeuda = {
+                id: Date.now(),
+                tipo: document.getElementById('tipoDeuda').value,
+                concepto: document.getElementById('conceptoDeuda').value,
+                montoTotal: parseFloat(document.getElementById('montoTotalDeuda').value),
+                saldoPendiente: parseFloat(document.getElementById('saldoPendiente').value),
+                tasaInteres: parseFloat(document.getElementById('tasaInteres').value) || 0,
+                fechaInicio: document.getElementById('fechaInicioDeuda').value,
+                fechaVencimiento: document.getElementById('fechaVencimiento').value,
+                descripcion: document.getElementById('descripcionDeuda').value,
+                createdAt: new Date()
+            };
+            
+            try {
+                if (auth.currentUser) {
+                    await addDoc(
+                        collection(db, "users", auth.currentUser.uid, "deudas"),
+                        nuevaDeuda
+                    );
+                }
+            } catch (err) {
+                console.warn("No se pudo guardar deuda en Firestore:", err);
+                alert("Error al guardar la deuda/préstamo. Intenta nuevamente.");
+            }
+            
+            document.getElementById('deudaForm').reset();
+            document.getElementById('fechaInicioDeuda').valueAsDate = new Date();
+        });
+        
+        // Formulario de Préstamos
+        document.getElementById('prestamoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
 
+            const nuevoPrestamo = {
+                id: Date.now(),
+                concepto: document.getElementById('conceptoPrestamo').value,
+                deudor: document.getElementById('deudorPrestamo').value,
+                montoTotal: parseFloat(document.getElementById('montoTotalPrestamo').value),
+                saldoPendiente: parseFloat(document.getElementById('saldoPendientePrestamo').value),
+                tasaInteres: parseFloat(document.getElementById('tasaInteresPrestamo').value) || 0,
+                fechaInicio: document.getElementById('fechaInicioPrestamo').value,
+                fechaVencimiento: document.getElementById('fechaVencimientoPrestamo').value,
+                descripcion: document.getElementById('descripcionPrestamo').value,
+                createdAt: new Date()
+            };
+            
+            try {
+                if (auth.currentUser) {
+                    await addDoc(
+                        collection(db, "users", auth.currentUser.uid, "prestamos"),
+                        nuevoPrestamo
+                    );
+                }
+            } catch (err) {
+                console.warn("No se pudo guardar préstamo en Firestore:", err);
+                alert("Error al guardar el préstamo. Intenta nuevamente.");
+            }
+            
+            document.getElementById('prestamoForm').reset();
+            document.getElementById('fechaInicioPrestamo').valueAsDate = new Date();
+        });
+        
         // Funciones de actualización - SE MANTIENE IGUAL (solo la lógica de UI)
         function actualizarTodo() {
             actualizarIngresos();
@@ -942,6 +1262,7 @@
             actualizarResumen();
             actualizarMetas();
             actualizarPresupuesto();
+            actualizarDeudas();
         }
 
         function obtenerMesActual() {
@@ -1102,27 +1423,37 @@
                 const alerta80 = progreso >= 80;
                 
                 return `
-                    <div class="p-4 ${alerta80 ? 'bg-yellow-50 border-2 border-yellow-300' : 'bg-purple-50'} rounded-lg border">
-                        ${alerta80 ? '<div class="text-yellow-600 text-sm font-medium mb-2">🎉 ¡Casi alcanzas tu meta!</div>' : ''}
-                        <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <h4 class="font-semibold text-gray-800 text-lg">🎯 ${meta.nombre}</h4>
-                                <p class="text-sm text-gray-600">S/ ${meta.ahorroActual.toFixed(2)} de S/ ${meta.montoObjetivo.toFixed(2)}</p>
-                                ${diasRestantes !== null ? `<p class="text-sm text-gray-500">${diasRestantes > 0 ? `${diasRestantes} días restantes` : 'Meta vencida'}</p>` : ''}
-                            </div>
-                            <div class="text-right">
-                                <p class="text-2xl font-bold text-purple-600">${progreso.toFixed(1)}%</p>
-                                <button onclick="eliminarMeta('${meta.id}')" class="text-red-500 hover:text-red-700 text-sm">🗑️</button>
-                            </div>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-3">
-                            <div class="bg-purple-500 h-3 rounded-full transition-all duration-300" style="width: ${Math.min(progreso, 100)}%"></div>
-                        </div>
-                        <div class="mt-2 flex justify-between text-sm">
-                            <button onclick="actualizarAhorroMeta('${meta.id}')" class="text-purple-600 hover:text-purple-800">💰 Actualizar ahorro</button>
-                            <span class="text-gray-500">Faltan S/ ${(meta.montoObjetivo - meta.ahorroActual).toFixed(2)}</span>
+                <div class="p-4 ${alerta80 ? 'bg-yellow-50 border-2 border-yellow-300' : 'bg-purple-50'} rounded-lg border">
+                    ${alerta80 ? '<div class="text-yellow-600 text-sm font-medium mb-2">🎉 ¡Casi alcanzas tu meta!</div>' : ''}
+                    <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <h4 class="font-semibold text-gray-800 text-lg">🎯 ${meta.nombre}</h4>
+                        <p class="text-sm text-gray-600">S/ ${meta.ahorroActual.toFixed(2)} de S/ ${meta.montoObjetivo.toFixed(2)}</p>
+                        ${diasRestantes !== null ? `<p class="text-sm text-gray-500">${diasRestantes > 0 ? `${diasRestantes} días restantes` : 'Meta vencida'}</p>` : ''}
+                    </div>
+                    <div class="text-right">
+                        <p class="text-2xl font-bold text-purple-600">${progreso.toFixed(1)}%</p>
+                        <div class="flex gap-2 justify-end mt-1">
+                        <button onclick="actualizarAhorroMeta('${meta.id}')" class="text-purple-600 hover:text-purple-800 text-sm">💰 Actualizar</button>
+                        <button onclick="toggleHistorialMeta('${meta.id}')" class="text-gray-700 hover:text-gray-900 text-sm">📜 Historial</button>
+                        <button onclick="eliminarMeta('${meta.id}')" class="text-red-500 hover:text-red-700 text-sm">🗑️</button>
                         </div>
                     </div>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div class="bg-purple-500 h-3 rounded-full transition-all duration-300" style="width: ${Math.min(progreso, 100)}%"></div>
+                    </div>
+                    <div class="mt-2 flex justify-between text-sm">
+                    <span class="text-gray-500">Faltan S/ ${(meta.montoObjetivo - meta.ahorroActual).toFixed(2)}</span>
+                    </div>
+
+                    <!-- HISTORIAL DE APORTES -->
+                    <div id="historial-meta-${meta.id}" class="deuda-detalle mt-3">
+                    <div class="historial-pagos p-3">
+                        <div class="text-sm text-gray-600">Cargando historial...</div>
+                    </div>
+                    </div>
+                </div>
                 `;
             }).join('');
         }
@@ -1137,6 +1468,10 @@
             
             const mesActual = obtenerMesActual();
             const gastosMes = filtrarPorMes(gastos, mesActual);
+            const ingresosMesX = filtrarPorMes(ingresos, mesActual);
+            const totalMesX = ingresosMesX.reduce((s,i) => s + i.monto, 0);
+            const elTotalPresu = document.getElementById('totalIngresosMesPresupuesto');
+            if (elTotalPresu) elTotalPresu.textContent = totalMes.toFixed(2);
             
             tabla.innerHTML = presupuestos.map(presupuesto => {
                 const gastoReal = gastosMes
@@ -1220,6 +1555,85 @@
             actualizarGraficoTendenciaAnual(datosAnuales);
         }
 
+        function actualizarDeudas() {
+            // Calcular total de deudas pendientes
+            const totalDeudasPendientes = deudas.reduce((sum, deuda) => sum + deuda.saldoPendiente, 0);
+            
+            // Calcular total de deuda pagada
+            const totalDeudaPagada = deudas.reduce((sum, deuda) => sum + (deuda.montoTotal - deuda.saldoPendiente), 0);
+            
+            // El balance neto ahora muestra el total pendiente (negativo)
+            const balanceDeudas = -totalDeudasPendientes;
+            
+            document.getElementById('totalDeudas').textContent = totalDeudasPendientes.toFixed(2);
+            document.getElementById('totalDeudaPagada').textContent = totalDeudaPagada.toFixed(2);
+            document.getElementById('balanceDeudas').textContent = balanceDeudas.toFixed(2);
+            
+            const balanceTexto = document.getElementById('balanceDeudasTexto');
+            if (balanceDeudas > 0) {
+                balanceTexto.className = 'text-3xl font-bold text-green-600';
+            } else if (balanceDeudas < 0) {
+                balanceTexto.className = 'text-3xl font-bold text-red-600';
+            } else {
+                balanceTexto.className = 'text-3xl font-bold text-gray-600';
+            }
+            
+            const lista = document.getElementById('listaDeudas');
+            
+            if (deudas.length === 0) {
+                lista.innerHTML = '<p class="text-gray-500 text-center py-8">No hay deudas registradas</p>';
+                return;
+            }
+            
+            const deudasOrdenadas = [...deudas].sort((a, b) => new Date(b.fechaInicio) - new Date(a.fechaInicio));
+            
+            lista.innerHTML = deudasOrdenadas.map(deuda => {
+                const progreso = ((deuda.montoTotal - deuda.saldoPendiente) / deuda.montoTotal) * 100;
+                const diasRestantes = deuda.fechaVencimiento ? Math.ceil((new Date(deuda.fechaVencimiento) - new Date()) / (1000 * 60 * 60 * 24)) : null;
+                const deudaPagada = deuda.montoTotal - deuda.saldoPendiente;
+
+                return `
+                    <div class="p-4 bg-red-50 rounded-lg border border-red-200">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="text-lg">🔴</span>
+                                    <h4 class="font-semibold text-gray-800">${deuda.concepto}</h4>
+                                    <span class="text-sm bg-red-100 text-red-800 px-2 py-1 rounded-full">Deuda</span>
+                                </div>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
+                                    <div><span class="font-medium">Total:</span> S/ ${deuda.montoTotal.toFixed(2)}</div>
+                                    <div><span class="font-medium">Pendiente:</span> S/ ${deuda.saldoPendiente.toFixed(2)}</div>
+                                    <div><span class="font-medium">Pagado:</span> S/ ${deudaPagada.toFixed(2)}</div>
+                                    ${deuda.tasaInteres > 0 ? `<div><span class="font-medium">Interés:</span> ${deuda.tasaInteres}%</div>` : ''}
+                                    ${diasRestantes !== null ? `<div><span class="font-medium">${diasRestantes > 0 ? 'Días restantes' : 'Vencido'}:</span> ${Math.abs(diasRestantes)}</div>` : ''}
+                                </div>
+                                ${deuda.descripcion ? `<p class="text-sm text-gray-500 mt-2">${deuda.descripcion}</p>` : ''}
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="abonarDeuda('${deuda.id}')" class="text-green-600 hover:text-green-800 text-sm font-medium">💰 Abonar</button>
+                                <button onclick="toggleHistorialDeuda('${deuda.id}')" class="text-gray-700 hover:text-gray-900 text-sm font-medium">📜 Historial</button>
+                                <button onclick="eliminarDeuda('${deuda.id}')" class="text-red-500 hover:text-red-700 text-sm">🗑️</button>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-red-500 h-2 rounded-full transition-all duration-300" style="width: ${Math.min(progreso, 100)}%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>Pagado: ${progreso.toFixed(1)}%</span>
+                            <span>Faltan: S/ ${deuda.saldoPendiente.toFixed(2)}</span>
+                        </div>
+
+                        <!-- HISTORIAL DE PAGOS (plegable) -->
+                        <div id="historial-deuda-${deuda.id}" class="deuda-detalle mt-3">
+                            <div class="historial-pagos p-3">
+                                <div class="text-sm text-gray-600">Cargando historial...</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
         // MODIFICADO: Funciones de gráficos optimizadas para mejor rendimiento
         function actualizarGraficoIngresos() {
             const ctx = document.getElementById('ingresosChart');
@@ -1749,6 +2163,77 @@
             });
         }
 
+        function actualizarPrestamos() {
+            // Calcular total de préstamos activos (saldo pendiente)
+            const totalPrestamosActivos = prestamos.reduce((sum, prestamo) => sum + prestamo.saldoPendiente, 0);
+            
+            // Calcular total recuperado
+            const totalPrestamosRecuperados = prestamos.reduce((sum, prestamo) => sum + (prestamo.montoTotal - prestamo.saldoPendiente), 0);
+            
+            // Balance total (lo que te deben)
+            const balancePrestamos = totalPrestamosActivos;
+
+            document.getElementById('totalPrestamosActivos').textContent = totalPrestamosActivos.toFixed(2);
+            document.getElementById('totalPrestamosRecuperados').textContent = totalPrestamosRecuperados.toFixed(2);
+            document.getElementById('balancePrestamos').textContent = balancePrestamos.toFixed(2);
+            
+            const lista = document.getElementById('listaPrestamos');
+            
+            if (prestamos.length === 0) {
+                lista.innerHTML = '<p class="text-gray-500 text-center py-8">No hay préstamos registrados</p>';
+                return;
+            }
+            
+            const prestamosOrdenados = [...prestamos].sort((a, b) => new Date(b.fechaInicio) - new Date(a.fechaInicio));
+            
+            lista.innerHTML = prestamosOrdenados.map(prestamo => {
+                const progreso = ((prestamo.montoTotal - prestamo.saldoPendiente) / prestamo.montoTotal) * 100;
+                const diasRestantes = prestamo.fechaVencimiento ? Math.ceil((new Date(prestamo.fechaVencimiento) - new Date()) / (1000 * 60 * 60 * 24)) : null;
+                const prestamoRecuperado = prestamo.montoTotal - prestamo.saldoPendiente;
+
+                return `
+                    <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span class="text-lg">🏦</span>
+                                    <h4 class="font-semibold text-gray-800">${prestamo.concepto}</h4>
+                                    <span class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Préstamo</span>
+                                </div>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
+                                    <div><span class="font-medium">Deudor:</span> ${prestamo.deudor}</div>
+                                    <div><span class="font-medium">Total:</span> S/ ${prestamo.montoTotal.toFixed(2)}</div>
+                                    <div><span class="font-medium">Pendiente:</span> S/ ${prestamo.saldoPendiente.toFixed(2)}</div>
+                                    <div><span class="font-medium">Recuperado:</span> S/ ${prestamoRecuperado.toFixed(2)}</div>
+                                    ${prestamo.tasaInteres > 0 ? `<div><span class="font-medium">Interés:</span> ${prestamo.tasaInteres}%</div>` : ''}
+                                    ${diasRestantes !== null ? `<div><span class="font-medium">${diasRestantes > 0 ? 'Días restantes' : 'Vencido'}:</span> ${Math.abs(diasRestantes)}</div>` : ''}
+                                </div>
+                                ${prestamo.descripcion ? `<p class="text-sm text-gray-500 mt-2">${prestamo.descripcion}</p>` : ''}
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="abonarPrestamo('${prestamo.id}')" class="text-green-600 hover:text-green-800 text-sm font-medium">💰 Cobrar</button>
+                                <button onclick="toggleHistorialPrestamo('${prestamo.id}')" class="text-gray-700 hover:text-gray-900 text-sm font-medium">📜 Historial</button>
+                                <button onclick="eliminarPrestamo('${prestamo.id}')" class="text-red-500 hover:text-red-700 text-sm">🗑️</button>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: ${Math.min(progreso, 100)}%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>Recuperado: ${progreso.toFixed(1)}%</span>
+                            <span>Faltan: S/ ${prestamo.saldoPendiente.toFixed(2)}</span>
+                        </div>
+
+                        <!-- HISTORIAL DE COBROS (plegable) -->
+                        <div id="historial-prestamo-${prestamo.id}" class="deuda-detalle mt-3">
+                            <div class="historial-pagos p-3">
+                                <div class="text-sm text-gray-600">Cargando historial...</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }        
         // Funciones auxiliares - SE MANTIENE IGUAL
         function getFuenteIcon(fuente) {
             const iconos = {
@@ -1757,6 +2242,7 @@
                 'Venta': '🛍️',
                 'Inversión': '📈',
                 'Bono': '🎁',
+                'Préstamo': '💸',
                 'Otros': '📦'
             };
             return iconos[fuente] || '📦';
@@ -1771,6 +2257,8 @@
                 'Servicios': '💡',
                 'Compras': '🛍️',
                 'Educación': '📚',
+                'Deudas': '🧾',
+                'Ahorro': '💎',
                 'Otros': '📦'
             };
             return iconos[categoria] || '📦';
@@ -1783,6 +2271,17 @@
                 day: 'numeric' 
             });
         }
+        // ====== BUSCAR DOC FIRESTORE POR CAMPO id (tu id personalizado) ======
+        async function findDocIdByCustomId(path, customId) {
+        const qy = query(collection(db, path), where("id", "==", parseInt(customId)));
+        const snap = await getDocs(qy);
+        if (!snap.empty) return snap.docs[0].id; // usamos el primero
+        return null;
+        }
+
+        // Cache simple de snapshots de historiales abiertos
+        const _pagosListeners = {};
+        const _aportesListeners = {};
 
         // Funciones de eliminación - SE MANTIENE IGUAL
         window.eliminarIngreso = async function(id) {
@@ -1878,41 +2377,246 @@
             }
         }
 
-        window.actualizarAhorroMeta = async function(id) {
-            const meta = metas.find(m => m.id === parseInt(id));
-            if (meta) {
-                const nuevoAhorro = prompt(`Ingresa el nuevo monto ahorrado para "${meta.nombre}":`, meta.ahorroActual);
-                if (nuevoAhorro !== null && !isNaN(nuevoAhorro)) {
-                    try {
-                        if (auth.currentUser) {
-                            // Buscar la meta por ID personalizado
-                            const q = query(
-                                collection(db, "users", auth.currentUser.uid, "metas"),
-                                where("id", "==", parseInt(id))
-                            );
-                            const querySnapshot = await getDocs(q);
-                            
-                            if (!querySnapshot.empty) {
-                                // Actualizar cada documento encontrado
-                                const updatePromises = querySnapshot.docs.map(document => 
-                                    updateDoc(doc(db, "users", auth.currentUser.uid, "metas", document.id), {
-                                        ahorroActual: parseFloat(nuevoAhorro)
-                                    })
-                                );
-                                await Promise.all(updatePromises);
-                                console.log("Meta actualizada exitosamente");
-                            } else {
-                                console.log("No se encontró la meta para actualizar");
-                                alert("No se pudo encontrar la meta para actualizar.");
-                            }
-                        }
-                    } catch (e) {
-                        console.warn("No se pudo actualizar en Firestore:", e);
-                        alert("Error al actualizar el ahorro. Intenta nuevamente.");
+        window.eliminarDeuda = async function(id) {
+            if (!confirm('¿Estás seguro de eliminar este registro?')) return;
+            
+            try {
+                if (auth.currentUser) {
+                    console.log("Buscando deuda con ID:", id);
+                    
+                    const q = query(
+                        collection(db, "users", auth.currentUser.uid, "deudas"),
+                        where("id", "==", parseInt(id))
+                    );
+                    const querySnapshot = await getDocs(q);
+                    
+                    if (!querySnapshot.empty) {
+                        const deletePromises = querySnapshot.docs.map(document => 
+                            deleteDoc(doc(db, "users", auth.currentUser.uid, "deudas", document.id))
+                        );
+                        await Promise.all(deletePromises);
+                        console.log("Deuda eliminada exitosamente");
+                    } else {
+                        console.log("No se encontró la deuda para eliminar");
+                        alert("No se pudo encontrar la deuda para eliminar.");
                     }
                 }
+            } catch (e) { 
+                console.error("Error al eliminar deuda:", e); 
+                alert("Error al eliminar la deuda. Intenta nuevamente.");
             }
         }
+
+        window.abonarDeuda = async function(id) {
+        const deuda = deudas.find(d => d.id === parseInt(id));
+        if (!deuda) return;
+
+        const abonoStr = prompt(`Ingresa el monto a abonar para "${deuda.concepto}":\nSaldo pendiente: S/ ${deuda.saldoPendiente.toFixed(2)}`, "0.00");
+        if (abonoStr === null) return;
+
+        const abono = parseFloat(abonoStr);
+        if (isNaN(abono) || abono <= 0) return alert("Monto inválido.");
+
+        const nota = prompt("Nota (opcional):", "") || "";
+        const nuevoSaldo = Math.max(0, deuda.saldoPendiente - abono);
+
+        try {
+            if (!auth.currentUser) return;
+            const basePath = `users/${auth.currentUser.uid}/deudas`;
+            const docId = await findDocIdByCustomId(basePath, id);
+            if (!docId) return alert("No se encontró la deuda para actualizar.");
+
+            // 1) Actualizar saldo
+            await updateDoc(doc(db, basePath, docId), { saldoPendiente: nuevoSaldo });
+
+            // 2) Registrar pago en subcolección
+            await addDoc(collection(db, basePath, docId, "pagos"), {
+            monto: abono,
+            fecha: new Date().toISOString(),
+            nota
+            });
+
+            // Si el historial está abierto, ya se actualizará por onSnapshot
+            console.log("Abono registrado y historial actualizado");
+        } catch (e) {
+            console.error(e);
+            alert("Error al registrar el abono.");
+        }
+        };
+        
+        window.toggleHistorialDeuda = async function(customId) {
+        const cont = document.getElementById(`historial-deuda-${customId}`);
+        if (!cont) return;
+
+        // Toggle visual
+        const open = !cont.classList.contains('open');
+        cont.classList.toggle('open');
+
+        // Si lo abrimos por primera vez, levantar listener
+        if (open && !_pagosListeners[customId] && auth.currentUser) {
+            const docId = await findDocIdByCustomId(`users/${auth.currentUser.uid}/deudas`, customId);
+            if (!docId) {
+            cont.querySelector('.historial-pagos').innerHTML = `<div class="text-sm text-red-600">No se encontró la deuda.</div>`;
+            return;
+            }
+            const pagosRefPath = `users/${auth.currentUser.uid}/deudas/${docId}/pagos`;
+            _pagosListeners[customId] = onSnapshot(collection(db, pagosRefPath), (snap) => {
+            const items = snap.docs
+                .map(d => d.data())
+                .sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+
+            const html = items.length === 0
+                ? `<p class="text-gray-500 text-sm">Sin pagos aún.</p>`
+                : items.map(p => `
+                    <div class="p-3 rounded-lg pago-item mb-2">
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-800">Pago</span>
+                        <span class="font-semibold text-green-700">S/ ${Number(p.monto).toFixed(2)}</span>
+                    </div>
+                    <div class="text-xs text-gray-600">${formatearFecha(p.fecha)}</div>
+                    ${p.nota ? `<div class="text-xs text-gray-500 mt-1">${p.nota}</div>` : ''}
+                    </div>
+                `).join('');
+
+            cont.querySelector('.historial-pagos').innerHTML = html;
+            });
+        }
+        };
+        
+        window.toggleHistorialMeta = async function(customId) {
+        const cont = document.getElementById(`historial-meta-${customId}`);
+        if (!cont) return;
+        const open = !cont.classList.contains('open');
+        cont.classList.toggle('open');
+
+        if (open && !_aportesListeners[customId] && auth.currentUser) {
+            const docId = await findDocIdByCustomId(`users/${auth.currentUser.uid}/metas`, customId);
+            if (!docId) {
+            cont.querySelector('.historial-pagos').innerHTML = `<div class="text-sm text-red-600">No se encontró la meta.</div>`;
+            return;
+            }
+            const apRefPath = `users/${auth.currentUser.uid}/metas/${docId}/aportes`;
+            _aportesListeners[customId] = onSnapshot(collection(db, apRefPath), (snap) => {
+            const items = snap.docs
+                .map(d => d.data())
+                .sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+
+            const html = items.length === 0
+                ? `<p class="text-gray-500 text-sm">Sin aportes aún.</p>`
+                : items.map(p => `
+                    <div class="p-3 rounded-lg pago-item mb-2">
+                    <div class="flex justify-between">
+                        <span class="font-medium text-gray-800">Aporte</span>
+                        <span class="font-semibold text-green-700">S/ ${Number(p.monto).toFixed(2)}</span>
+                    </div>
+                    <div class="text-xs text-gray-600">${formatearFecha(p.fecha)}</div>
+                    ${p.nota ? `<div class="text-xs text-gray-500 mt-1">${p.nota}</div>` : ''}
+                    </div>
+                `).join('');
+
+            cont.querySelector('.historial-pagos').innerHTML = html;
+            });
+        }
+        };
+        
+        window.actualizarAhorroMeta = async function(id) {
+        const meta = metas.find(m => m.id === parseInt(id));
+        if (!meta) return;
+
+        const aporteStr = prompt(`Ingresa el monto a agregar a "${meta.nombre}":`, "0.00");
+        if (aporteStr === null) return;
+        const aporte = parseFloat(aporteStr);
+        if (isNaN(aporte) || aporte <= 0) return alert("Monto inválido.");
+
+        const nota = prompt("Nota (opcional):", "") || "";
+        const nuevoAhorro = (meta.ahorroActual || 0) + aporte;
+
+        try {
+            if (!auth.currentUser) return;
+            const basePath = `users/${auth.currentUser.uid}/metas`;
+            const docId = await findDocIdByCustomId(basePath, id);
+            if (!docId) return alert("No se encontró la meta para actualizar.");
+
+            // 1) actualizar ahorro
+            await updateDoc(doc(db, basePath, docId), { ahorroActual: nuevoAhorro });
+            // 2) guardar aporte
+            await addDoc(collection(db, basePath, docId, "aportes"), {
+            monto: aporte,
+            fecha: new Date().toISOString(),
+            nota
+            });
+        } catch (e) {
+            console.warn("No se pudo actualizar en Firestore:", e);
+            alert("Error al actualizar el ahorro.");
+        }
+        };
+        
+        window.abonarPrestamo = async function(id) {
+            const prestamo = prestamos.find(p => p.id === parseInt(id));
+            if (!prestamo) return;
+
+            const cobroStr = prompt(`Ingresa el monto cobrado de "${prestamo.concepto}":\nSaldo pendiente: S/ ${prestamo.saldoPendiente.toFixed(2)}`, "0.00");
+            if (cobroStr === null) return;
+
+            const cobro = parseFloat(cobroStr);
+            if (isNaN(cobro) || cobro <= 0) return alert("Monto inválido.");
+
+            const nota = prompt("Nota (opcional):", "") || "";
+            const nuevoSaldo = Math.max(0, prestamo.saldoPendiente - cobro);
+
+            try {
+                if (!auth.currentUser) return;
+                const basePath = `users/${auth.currentUser.uid}/prestamos`;
+                const docId = await findDocIdByCustomId(basePath, id);
+                if (!docId) return alert("No se encontró el préstamo para actualizar.");
+
+                // 1) Actualizar saldo
+                await updateDoc(doc(db, basePath, docId), { saldoPendiente: nuevoSaldo });
+
+                // 2) Registrar cobro en subcolección
+                await addDoc(collection(db, basePath, docId, "cobros"), {
+                    monto: cobro,
+                    fecha: new Date().toISOString(),
+                    nota
+                });
+
+                console.log("Cobro registrado y historial actualizado");
+            } catch (e) {
+                console.error(e);
+                alert("Error al registrar el cobro.");
+            }
+        };
+        
+        window.eliminarPrestamo = async function(id) {
+            if (!confirm('¿Estás seguro de eliminar este préstamo?')) return;
+            
+            try {
+                if (auth.currentUser) {
+                    console.log("Buscando préstamo con ID:", id);
+                    
+                    const q = query(
+                        collection(db, "users", auth.currentUser.uid, "prestamos"),
+                        where("id", "==", parseInt(id))
+                    );
+                    const querySnapshot = await getDocs(q);
+                    
+                    if (!querySnapshot.empty) {
+                        const deletePromises = querySnapshot.docs.map(document => 
+                            deleteDoc(doc(db, "users", auth.currentUser.uid, "prestamos", document.id))
+                        );
+                        await Promise.all(deletePromises);
+                        console.log("Préstamo eliminado exitosamente");
+                    } else {
+                        console.log("No se encontró el préstamo para eliminar");
+                        alert("No se pudo encontrar el préstamo para eliminar.");
+                    }
+                }
+            } catch (e) { 
+                console.error("Error al eliminar préstamo:", e); 
+                alert("Error al eliminar el préstamo. Intenta nuevamente.");
+            }
+        };
+        
         // MODIFICADO: Configurar listeners optimizados
         function configurarListenersTiempoReal(uid) {
             // Listener para ingresos
@@ -1920,6 +2624,7 @@
                 ingresos = snapshot.docs.map(doc => ({ ...doc.data(), firebaseId: doc.id }));
                 actualizarIngresos();
                 actualizarResumen();
+                actualizarPresupuesto();
                 // MODIFICADO: Solo actualizar gráficos si están visibles
                 if (document.getElementById('ingresos').classList.contains('active')) {
                     actualizarGraficoIngresos();
@@ -1950,6 +2655,21 @@
                 // MODIFICADO: Solo actualizar gráficos si están visibles
                 if (document.getElementById('presupuesto').classList.contains('active')) {
                     actualizarGraficoPresupuesto();
+                }
+            });
+
+            onSnapshot(collection(db, "users", uid, "deudas"), (snapshot) => {
+                deudas = snapshot.docs.map(doc => ({ ...doc.data(), firebaseId: doc.id }));
+                actualizarDeudas();
+            });
+
+            // Listener para préstamos
+            onSnapshot(collection(db, "users", uid, "prestamos"), (snapshot) => {
+                prestamos = snapshot.docs.map(doc => ({ ...doc.data(), firebaseId: doc.id }));
+                actualizarPrestamos();
+                // MODIFICADO: Solo actualizar si está visible
+                if (document.getElementById('prestamos').classList.contains('active')) {
+                    actualizarPrestamos();
                 }
             });
         }
